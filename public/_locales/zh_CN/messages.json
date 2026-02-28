@@ -1,0 +1,10 @@
+{
+    "extension_name": {
+        "message": "SnapLab",
+        "description": "SnapLab 名称"
+    },
+    "extension_description": {
+        "message": "网页助手插件，包含图片预览、缩放、旋转等图片处理相关功能。",
+        "description": "SnapLab 描述"
+    }
+}

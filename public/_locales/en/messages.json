@@ -1,0 +1,10 @@
+{
+    "extension_name": {
+        "message": "SnapLab",
+        "description": "SnapLab Name"
+    },
+    "extension_description": {
+        "message": "A web assistant plugin including image preview, zoom, rotate, and other image processing related functions.",
+        "description": "SnapLab Description"
+    }
+}

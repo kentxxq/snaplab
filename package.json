@@ -1,0 +1,31 @@
+{
+  "name": "snaplab",
+  "description": "网页助手插件，包含图片预览、缩放、旋转等图片处理相关功能。",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "zip:edge": "wxt zip -b edge",
+    "compile": "vue-tsc --noEmit",
+    "postinstall": "wxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/ui": "^4.5.0",
+    "tailwindcss": "^4.2.1",
+    "v-viewer": "^3.0.11",
+    "viewerjs": "^1.11.7",
+    "vue": "^3.5.27"
+  },
+  "devDependencies": {
+    "@wxt-dev/module-vue": "^1.0.3",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.2.4",
+    "wxt": "^0.20.18"
+  }
+}
