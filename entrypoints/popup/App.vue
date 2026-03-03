@@ -6,19 +6,28 @@ const extensionDesc = browser.i18n.getMessage("extension_description");
 
 // 拦截开关状态，默认开启
 const interceptEnabled = ref(true);
+// 美化开关状态，默认开启
+const beautifyEnabled = ref(true);
 
 onMounted(async () => {
   // 从 storage 读取开关状态
-  const result = await browser.storage.local.get('interceptEnabled');
+  const result = await browser.storage.local.get(['interceptEnabled', 'beautifyEnabled']);
   if (typeof result.interceptEnabled === 'boolean') {
     interceptEnabled.value = result.interceptEnabled;
+  }
+  if (typeof result.beautifyEnabled === 'boolean') {
+    beautifyEnabled.value = result.beautifyEnabled;
   }
 });
 
 async function toggleIntercept() {
   interceptEnabled.value = !interceptEnabled.value;
-  // 保存到 storage
   await browser.storage.local.set({ interceptEnabled: interceptEnabled.value });
+}
+
+async function toggleBeautify() {
+  beautifyEnabled.value = !beautifyEnabled.value;
+  await browser.storage.local.set({ beautifyEnabled: beautifyEnabled.value });
 }
 </script>
 
@@ -29,19 +38,34 @@ async function toggleIntercept() {
     <p class="desc">{{ extensionDesc }}</p>
 
     <div class="toggle-section">
-      <span class="toggle-label">图片预览拦截</span>
+      <span class="toggle-label">图片预览</span>
       <button
         class="toggle-btn"
         :class="{ active: interceptEnabled }"
         @click="toggleIntercept"
-        :title="interceptEnabled ? '点击关闭拦截' : '点击开启拦截'"
+        :title="interceptEnabled ? '点击关闭' : '点击开启'"
+      >
+        <span class="toggle-knob" />
+      </button>
+    </div>
+
+    <div class="toggle-section">
+      <span class="toggle-label">图片美化</span>
+      <button
+        class="toggle-btn"
+        :class="{ active: beautifyEnabled }"
+        @click="toggleBeautify"
+        :title="beautifyEnabled ? '点击关闭' : '点击开启'"
       >
         <span class="toggle-knob" />
       </button>
     </div>
 
     <p class="status-text">
-      {{ interceptEnabled ? '已开启 · 悬停图片显示操作菜单' : '已关闭 · 图片交互恢复默认' }}
+      {{ interceptEnabled ? '预览已开启 · 悬停图片显示操作菜单' : '预览已关闭 · 图片交互恢复默认' }}
+    </p>
+    <p class="status-text" v-if="interceptEnabled">
+      {{ beautifyEnabled ? '美化已开启 · 可一键美化导出图片' : '美化已关闭 · 仅保留预览功能' }}
     </p>
   </div>
 </template>

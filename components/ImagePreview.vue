@@ -3,10 +3,12 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 
 const props = defineProps<{
   src: string;
+  beautifyEnabled?: boolean;
 }>();
 
 const emit = defineEmits<{
   close: [];
+  beautify: [];
 }>();
 
 // 图片变换状态
@@ -180,6 +182,13 @@ onBeforeUnmount(() => {
       <button class="tool-btn" @click="resetTransform" title="重置">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
       </button>
+
+      <template v-if="props.beautifyEnabled">
+        <span class="toolbar-divider"></span>
+        <button class="tool-btn" @click="emit('beautify')" title="美化图片">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/></svg>
+        </button>
+      </template>
     </div>
   </div>
 </template>
