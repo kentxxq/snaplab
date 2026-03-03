@@ -16,7 +16,6 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
-    "@nuxt/ui": "^4.5.0",
     "tailwindcss": "^4.2.1",
     "v-viewer": "^3.0.11",
     "viewerjs": "^1.11.7",
