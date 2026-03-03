@@ -41,7 +41,7 @@ async function toggleIntercept() {
     </div>
 
     <p class="status-text">
-      {{ interceptEnabled ? '已开启 · 点击图片即可预览' : '已关闭 · 图片点击行为恢复默认' }}
+      {{ interceptEnabled ? '已开启 · 悬停图片显示操作菜单' : '已关闭 · 图片交互恢复默认' }}
     </p>
   </div>
 </template>
