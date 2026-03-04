@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import ImageExifPanel from './ImageExifPanel.vue';
 
 const props = defineProps<{
   src: string;
@@ -10,6 +11,9 @@ const emit = defineEmits<{
   close: [];
   beautify: [];
 }>();
+
+// EXIF 面板显示状态
+const showExif = ref(false);
 
 // 图片变换状态
 const scale = ref(1);
@@ -183,6 +187,12 @@ onBeforeUnmount(() => {
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
       </button>
 
+      <span class="toolbar-divider"></span>
+
+      <button class="tool-btn" :class="{ active: showExif }" @click="showExif = !showExif" title="EXIF 信息">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      </button>
+
       <template v-if="props.beautifyEnabled">
         <span class="toolbar-divider"></span>
         <button class="tool-btn" @click="emit('beautify')" title="美化图片">
@@ -190,6 +200,13 @@ onBeforeUnmount(() => {
         </button>
       </template>
     </div>
+
+    <!-- EXIF 信息面板 -->
+    <ImageExifPanel
+      v-if="showExif"
+      :src="props.src"
+      @close="showExif = false"
+    />
   </div>
 </template>
 

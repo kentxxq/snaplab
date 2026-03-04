@@ -29,6 +29,33 @@ async function toggleBeautify() {
   beautifyEnabled.value = !beautifyEnabled.value;
   await browser.storage.local.set({ beautifyEnabled: beautifyEnabled.value });
 }
+
+// 打开本地图片
+function openLocalImage() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*,.heic,.heif';
+  input.onchange = async () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result as string;
+      // 发送给当前活跃标签页的 content script
+      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+      if (tab?.id) {
+        await browser.tabs.sendMessage(tab.id, {
+          type: 'snaplab:open-local-image',
+          dataUrl,
+        });
+        // 关闭 popup
+        window.close();
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
 </script>
 
 <template>
@@ -67,6 +94,13 @@ async function toggleBeautify() {
     <p class="status-text" v-if="interceptEnabled">
       {{ beautifyEnabled ? '美化已开启 · 可一键美化导出图片' : '美化已关闭 · 仅保留预览功能' }}
     </p>
+
+    <div class="divider"></div>
+
+    <button class="open-local-btn" @click="openLocalImage">
+      📁 打开本地图片
+    </button>
+    <p class="status-text">选择本地图片进行预览 / 美化 / EXIF 查看</p>
   </div>
 </template>
 
@@ -147,11 +181,46 @@ async function toggleBeautify() {
   margin: 0;
 }
 
+/* 分隔线 */
+.divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 16px 0;
+}
+
+/* 打开本地图片按钮 */
+.open-local-btn {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f5f5f5;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+}
+.open-local-btn:hover {
+  background: #e8e8e8;
+  border-color: #ccc;
+}
+
 @media (prefers-color-scheme: dark) {
   .title { color: #eee; }
   .desc { color: #ccc; }
   .toggle-label { color: #ddd; }
   .toggle-btn { background-color: #555; }
+  .divider { background: #444; }
+  .open-local-btn {
+    background: #333;
+    border-color: #555;
+    color: #ddd;
+  }
+  .open-local-btn:hover {
+    background: #444;
+    border-color: #666;
+  }
   .toggle-btn.active { background-color: #4caf50; }
   .status-text { color: #888; }
 }

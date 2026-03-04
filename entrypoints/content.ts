@@ -339,5 +339,12 @@ export default defineContentScript({
         hideToolbar();
       }
     }, { passive: true });
+
+    // ========== 消息监听：接收 popup 发来的本地图片 ==========
+    browser.runtime.onMessage.addListener((message: any) => {
+      if (message?.type === 'snaplab:open-local-image' && message.dataUrl) {
+        showPreview(message.dataUrl);
+      }
+    });
   },
 });

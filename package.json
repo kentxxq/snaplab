@@ -2,7 +2,7 @@
   "name": "snaplab",
   "description": "网页助手插件，包含图片预览、缩放、旋转等图片处理相关功能。",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -16,6 +16,7 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "exifreader": "^4.36.2",
     "tailwindcss": "^4.2.1",
     "v-viewer": "^3.0.11",
     "viewerjs": "^1.11.7",
