@@ -9,8 +9,8 @@ A web assistant browser extension with image preview, zoom, rotate and other ima
 - **极简设计**：无需复杂配置，开箱即用
 - **图片预览**：悬浮图片显示操作工具栏，支持滚轮缩放、鼠标拖拽、旋转、水平/垂直翻转
 - **图片美化**：一键美化导出，支持背景、圆角、内边距、阴影等参数调整，可复制或下载 PNG
-- **EXIF 查看**：读取并展示图片 EXIF 元数据（相机、镜头、GPS 等）
-- **本地图片**：支持打开本地图片进行预览 / 美化 / EXIF 查看（含 newtab 页面兼容）
+- **图片信息**：展示图片地址（带复制功能）、尺寸、格式、文件大小、MIME 类型及完整 EXIF 元数据（相机、镜头、GPS 等）
+- **本地图片**：支持打开本地图片进行预览 / 美化 / 信息查看（含 newtab 页面兼容）
 - **中英双语**：支持中文 / English 手动切换
 - **跨浏览器**：支持 Chrome、Edge 等主流浏览器
 
@@ -47,10 +47,11 @@ entrypoints/
 components/
   ├── ImagePreview.vue    # 图片预览组件
   ├── ImageBeautify.vue   # 图片美化组件
-  ├── ImageExifPanel.vue  # EXIF 信息面板
+  ├── ImageInfoPanel.vue  # 图片信息面板（基本信息 + EXIF）
   └── ImageHoverToolbar.vue # 悬浮工具栏
 utils/
-  └── i18n.ts             # 自定义国际化工具（支持运行时中英文切换）
+  ├── i18n.ts             # 自定义国际化工具（支持运行时中英文切换）
+  └── imageUrlResolvers.ts # 站点特定图片 URL 解析器（兼容 Reddit 等站点）
 public/
   └── _locales/           # Chrome i18n 翻译文件（zh_CN / en）
 ```
@@ -62,7 +63,12 @@ public/
     - [ ] 快速缩小/裁剪
     - [ ] 格式转换
 
-## Changelog
+### v0.0.5 (2026-03-09)
+
+- ✨ **工具栏优化**：底部工具栏 Info 图标改为展示综合图片信息（地址、尺寸、格式、大小等）
+- 🔗 **便捷功能**：信息面板内支持一键复制图片原始 URL
+- 🛠️ **兼容性增强**：通过后台脚本代理请求，修复 Reddit 等站点因 CORS 限制导致无法读取图片信息的问题
+- 🗑️ **代码清理**：移除不再使用的旧版 EXIF 面板组件
 
 ### v0.0.4 (2026-03-09)
 

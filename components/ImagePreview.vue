@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import ImageExifPanel from './ImageExifPanel.vue';
+import ImageInfoPanel from './ImageInfoPanel.vue';
 import { initLanguage, t } from '@/utils/i18n';
 
 const props = defineProps<{
@@ -14,7 +14,7 @@ const emit = defineEmits<{
 }>();
 
 // EXIF 面板显示状态 (EXIF panel visibility)
-const showExif = ref(false);
+const showInfo = ref(false);
 
 // 图片变换状态 (image transform state)
 const scale = ref(1);
@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
 
       <span class="toolbar-divider"></span>
 
-      <button class="tool-btn" :class="{ active: showExif }" @click="showExif = !showExif" :title="t('btn_exif')">
+      <button class="tool-btn" :class="{ active: showInfo }" @click="showInfo = !showInfo" :title="t('btn_info')">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
       </button>
 
@@ -156,7 +156,7 @@ onBeforeUnmount(() => {
       </template>
     </div>
 
-    <ImageExifPanel v-if="showExif" :src="props.src" @close="showExif = false" />
+    <ImageInfoPanel v-if="showInfo" :src="props.src" @close="showInfo = false" />
   </div>
 </template>
 
@@ -187,6 +187,7 @@ onBeforeUnmount(() => {
   transition: transform 0.15s ease; border-radius: 4px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
+
 .toolbar {
   position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
   display: flex; align-items: center; gap: 4px; padding: 8px 12px;

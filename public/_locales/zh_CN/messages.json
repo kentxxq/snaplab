@@ -87,9 +87,9 @@
         "message": "重置",
         "description": "重置按钮"
     },
-    "btn_exif": {
-        "message": "EXIF 信息",
-        "description": "EXIF 信息按钮"
+    "btn_info": {
+        "message": "图片信息",
+        "description": "图片信息按钮"
     },
     "btn_beautify": {
         "message": "美化图片",
@@ -186,6 +186,54 @@
     "beautify_image_load_error": {
         "message": "图片加载失败",
         "description": "图片加载失败错误信息"
+    },
+    "info_title": {
+        "message": "图片信息",
+        "description": "信息面板标题"
+    },
+    "info_loading": {
+        "message": "读取中…",
+        "description": "信息加载中"
+    },
+    "info_error": {
+        "message": "读取信息失败",
+        "description": "信息读取错误"
+    },
+    "info_basic_section": {
+        "message": "基本信息",
+        "description": "基本信息分区标题"
+    },
+    "info_exif_section": {
+        "message": "EXIF 拍摄参数",
+        "description": "EXIF 分区标题"
+    },
+    "info_url": {
+        "message": "图片地址",
+        "description": "图片 URL 标签"
+    },
+    "info_format": {
+        "message": "图片格式",
+        "description": "图片格式标签"
+    },
+    "info_dimensions": {
+        "message": "图片尺寸",
+        "description": "图片尺寸标签"
+    },
+    "info_file_size": {
+        "message": "文件大小",
+        "description": "文件大小标签"
+    },
+    "info_mime_type": {
+        "message": "MIME 类型",
+        "description": "MIME 类型标签"
+    },
+    "info_copy_url": {
+        "message": "复制地址",
+        "description": "复制 URL 按钮提示"
+    },
+    "info_unknown": {
+        "message": "未知",
+        "description": "未知格式"
     },
     "exif_title": {
         "message": "EXIF 信息",

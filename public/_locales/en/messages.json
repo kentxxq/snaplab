@@ -87,9 +87,9 @@
         "message": "Reset",
         "description": "Reset button"
     },
-    "btn_exif": {
-        "message": "EXIF Info",
-        "description": "EXIF info button"
+    "btn_info": {
+        "message": "Image Info",
+        "description": "Image info button"
     },
     "btn_beautify": {
         "message": "Beautify Image",
@@ -186,6 +186,54 @@
     "beautify_image_load_error": {
         "message": "Image loading failed",
         "description": "Image load error message"
+    },
+    "info_title": {
+        "message": "Image Info",
+        "description": "Info panel title"
+    },
+    "info_loading": {
+        "message": "Loading…",
+        "description": "Info loading"
+    },
+    "info_error": {
+        "message": "Failed to load info",
+        "description": "Info load error"
+    },
+    "info_basic_section": {
+        "message": "Basic Info",
+        "description": "Basic info section title"
+    },
+    "info_exif_section": {
+        "message": "EXIF Parameters",
+        "description": "EXIF section title"
+    },
+    "info_url": {
+        "message": "Image URL",
+        "description": "Image URL label"
+    },
+    "info_format": {
+        "message": "Format",
+        "description": "Image format label"
+    },
+    "info_dimensions": {
+        "message": "Dimensions",
+        "description": "Image dimensions label"
+    },
+    "info_file_size": {
+        "message": "File Size",
+        "description": "File size label"
+    },
+    "info_mime_type": {
+        "message": "MIME Type",
+        "description": "MIME type label"
+    },
+    "info_copy_url": {
+        "message": "Copy URL",
+        "description": "Copy URL button tooltip"
+    },
+    "info_unknown": {
+        "message": "Unknown",
+        "description": "Unknown format"
     },
     "exif_title": {
         "message": "EXIF Info",

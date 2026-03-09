@@ -4,6 +4,7 @@ import ImageHoverToolbar from '@/components/ImageHoverToolbar.vue';
 import ImageBeautify from '@/components/ImageBeautify.vue';
 import type { ToolbarAction } from '@/components/ImageHoverToolbar.vue';
 import { initLanguage, t } from '@/utils/i18n';
+import { upgradeImageUrl } from '@/utils/imageUrlResolvers';
 import '~/assets/main.css';
 
 // 放大镜 SVG 图标
@@ -144,13 +145,13 @@ export default defineContentScript({
 
     function getImageUrl(img: HTMLImageElement): string | null {
       const src = img.src || img.currentSrc;
-      if (src) return src;
+      if (src) return upgradeImageUrl(src);
 
       const anchor = img.closest('a');
       if (anchor) {
         const href = anchor.href;
         if (href && /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico|avif)(\?.*)?$/i.test(href)) {
-          return href;
+          return upgradeImageUrl(href);
         }
       }
 
