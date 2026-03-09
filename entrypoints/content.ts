@@ -3,6 +3,7 @@ import ImagePreview from '@/components/ImagePreview.vue';
 import ImageHoverToolbar from '@/components/ImageHoverToolbar.vue';
 import ImageBeautify from '@/components/ImageBeautify.vue';
 import type { ToolbarAction } from '@/components/ImageHoverToolbar.vue';
+import { initLanguage, t } from '@/utils/i18n';
 import '~/assets/main.css';
 
 // 放大镜 SVG 图标
@@ -16,6 +17,9 @@ export default defineContentScript({
   cssInjectionMode: 'ui',
 
   async main(ctx) {
+    // 初始化语言设置 (init language)
+    await initLanguage();
+
     // ========== 开关状态 ==========
     let interceptEnabled = true;
     let beautifyEnabled = true;
@@ -200,14 +204,14 @@ export default defineContentScript({
         actions.push({
           id: 'preview',
           icon: ICON_PREVIEW,
-          title: '预览图片',
+          title: t('toolbar_preview'),
         });
       }
       if (beautifyEnabled) {
         actions.push({
           id: 'beautify',
           icon: ICON_BEAUTIFY,
-          title: '美化图片',
+          title: t('toolbar_beautify'),
         });
       }
       return actions;

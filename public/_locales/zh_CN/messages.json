@@ -6,5 +6,305 @@
     "extension_description": {
         "message": "网页助手插件，包含图片预览、缩放、旋转等图片处理相关功能。",
         "description": "SnapLab 描述"
+    },
+    "popup_image_preview": {
+        "message": "图片预览",
+        "description": "Popup 中图片预览开关标签"
+    },
+    "popup_image_beautify": {
+        "message": "图片美化",
+        "description": "Popup 中图片美化开关标签"
+    },
+    "popup_click_to_close": {
+        "message": "点击关闭",
+        "description": "开关按钮关闭提示"
+    },
+    "popup_click_to_open": {
+        "message": "点击开启",
+        "description": "开关按钮开启提示"
+    },
+    "popup_preview_on": {
+        "message": "预览已开启 · 悬停图片显示操作菜单",
+        "description": "预览开启时的状态文字"
+    },
+    "popup_preview_off": {
+        "message": "预览已关闭 · 图片交互恢复默认",
+        "description": "预览关闭时的状态文字"
+    },
+    "popup_beautify_on": {
+        "message": "美化已开启 · 可一键美化导出图片",
+        "description": "美化开启时的状态文字"
+    },
+    "popup_beautify_off": {
+        "message": "美化已关闭 · 仅保留预览功能",
+        "description": "美化关闭时的状态文字"
+    },
+    "popup_open_local_image": {
+        "message": "📁 打开本地图片",
+        "description": "打开本地图片按钮"
+    },
+    "popup_open_local_hint": {
+        "message": "选择本地图片进行预览 / 美化 / EXIF 查看",
+        "description": "打开本地图片提示"
+    },
+    "toolbar_preview": {
+        "message": "预览图片",
+        "description": "悬浮工具栏预览按钮"
+    },
+    "toolbar_beautify": {
+        "message": "美化图片",
+        "description": "悬浮工具栏美化按钮"
+    },
+    "btn_close": {
+        "message": "关闭 (ESC)",
+        "description": "关闭按钮"
+    },
+    "btn_zoom_in": {
+        "message": "放大",
+        "description": "放大按钮"
+    },
+    "btn_zoom_out": {
+        "message": "缩小",
+        "description": "缩小按钮"
+    },
+    "btn_rotate_left": {
+        "message": "逆时针旋转",
+        "description": "逆时针旋转按钮"
+    },
+    "btn_rotate_right": {
+        "message": "顺时针旋转",
+        "description": "顺时针旋转按钮"
+    },
+    "btn_flip_x": {
+        "message": "水平翻转",
+        "description": "水平翻转按钮"
+    },
+    "btn_flip_y": {
+        "message": "垂直翻转",
+        "description": "垂直翻转按钮"
+    },
+    "btn_reset": {
+        "message": "重置",
+        "description": "重置按钮"
+    },
+    "btn_exif": {
+        "message": "EXIF 信息",
+        "description": "EXIF 信息按钮"
+    },
+    "btn_beautify": {
+        "message": "美化图片",
+        "description": "美化图片按钮"
+    },
+    "beautify_title": {
+        "message": "图片美化",
+        "description": "美化面板标题"
+    },
+    "beautify_background": {
+        "message": "背景",
+        "description": "美化面板背景选项"
+    },
+    "beautify_border_radius": {
+        "message": "圆角",
+        "description": "美化面板圆角选项"
+    },
+    "beautify_padding": {
+        "message": "内边距",
+        "description": "美化面板内边距选项"
+    },
+    "beautify_shadow": {
+        "message": "阴影",
+        "description": "美化面板阴影选项"
+    },
+    "beautify_shadow_none": {
+        "message": "无",
+        "description": "无阴影"
+    },
+    "beautify_shadow_small": {
+        "message": "小",
+        "description": "小阴影"
+    },
+    "beautify_shadow_medium": {
+        "message": "中",
+        "description": "中阴影"
+    },
+    "beautify_shadow_large": {
+        "message": "大",
+        "description": "大阴影"
+    },
+    "beautify_copy": {
+        "message": "复制",
+        "description": "复制按钮"
+    },
+    "beautify_copied": {
+        "message": "已复制",
+        "description": "已复制状态"
+    },
+    "beautify_failed": {
+        "message": "失败",
+        "description": "操作失败状态"
+    },
+    "beautify_download": {
+        "message": "下载 PNG",
+        "description": "下载按钮"
+    },
+    "beautify_downloaded": {
+        "message": "已下载",
+        "description": "已下载状态"
+    },
+    "beautify_bg_indigo": {
+        "message": "靛蓝紫",
+        "description": "背景颜色名"
+    },
+    "beautify_bg_cyan_pink": {
+        "message": "青粉",
+        "description": "背景颜色名"
+    },
+    "beautify_bg_warm_orange": {
+        "message": "暖橙",
+        "description": "背景颜色名"
+    },
+    "beautify_bg_deep_blue": {
+        "message": "深海蓝",
+        "description": "背景颜色名"
+    },
+    "beautify_bg_sunset": {
+        "message": "日落",
+        "description": "背景颜色名"
+    },
+    "beautify_bg_forest": {
+        "message": "森林",
+        "description": "背景颜色名"
+    },
+    "beautify_bg_profound": {
+        "message": "深邃",
+        "description": "背景颜色名"
+    },
+    "beautify_bg_dark_night": {
+        "message": "暗夜",
+        "description": "背景颜色名"
+    },
+    "beautify_image_load_error": {
+        "message": "图片加载失败",
+        "description": "图片加载失败错误信息"
+    },
+    "exif_title": {
+        "message": "EXIF 信息",
+        "description": "EXIF 面板标题"
+    },
+    "exif_loading": {
+        "message": "读取中…",
+        "description": "EXIF 加载中"
+    },
+    "exif_empty": {
+        "message": "此图片不包含 EXIF 数据",
+        "description": "无 EXIF 数据"
+    },
+    "exif_error": {
+        "message": "读取 EXIF 信息失败",
+        "description": "EXIF 读取错误"
+    },
+    "exif_make": {
+        "message": "相机品牌",
+        "description": "EXIF 字段"
+    },
+    "exif_model": {
+        "message": "相机型号",
+        "description": "EXIF 字段"
+    },
+    "exif_lens": {
+        "message": "镜头型号",
+        "description": "EXIF 字段"
+    },
+    "exif_focal_length": {
+        "message": "焦距",
+        "description": "EXIF 字段"
+    },
+    "exif_fnumber": {
+        "message": "光圈",
+        "description": "EXIF 字段"
+    },
+    "exif_exposure_time": {
+        "message": "快门速度",
+        "description": "EXIF 字段"
+    },
+    "exif_iso": {
+        "message": "ISO",
+        "description": "EXIF 字段"
+    },
+    "exif_exposure_bias": {
+        "message": "曝光补偿",
+        "description": "EXIF 字段"
+    },
+    "exif_metering_mode": {
+        "message": "测光模式",
+        "description": "EXIF 字段"
+    },
+    "exif_flash": {
+        "message": "闪光灯",
+        "description": "EXIF 字段"
+    },
+    "exif_white_balance": {
+        "message": "白平衡",
+        "description": "EXIF 字段"
+    },
+    "exif_date_original": {
+        "message": "拍摄时间",
+        "description": "EXIF 字段"
+    },
+    "exif_date_modified": {
+        "message": "修改时间",
+        "description": "EXIF 字段"
+    },
+    "exif_width": {
+        "message": "宽度 (px)",
+        "description": "EXIF 字段"
+    },
+    "exif_height": {
+        "message": "高度 (px)",
+        "description": "EXIF 字段"
+    },
+    "exif_x_resolution": {
+        "message": "水平分辨率",
+        "description": "EXIF 字段"
+    },
+    "exif_y_resolution": {
+        "message": "垂直分辨率",
+        "description": "EXIF 字段"
+    },
+    "exif_color_space": {
+        "message": "色彩空间",
+        "description": "EXIF 字段"
+    },
+    "exif_software": {
+        "message": "软件",
+        "description": "EXIF 字段"
+    },
+    "exif_copyright": {
+        "message": "版权",
+        "description": "EXIF 字段"
+    },
+    "exif_artist": {
+        "message": "作者",
+        "description": "EXIF 字段"
+    },
+    "exif_gps_lat": {
+        "message": "GPS 纬度",
+        "description": "EXIF 字段"
+    },
+    "exif_gps_lng": {
+        "message": "GPS 经度",
+        "description": "EXIF 字段"
+    },
+    "exif_gps_alt": {
+        "message": "GPS 海拔",
+        "description": "EXIF 字段"
+    },
+    "preview_page_title": {
+        "message": "SnapLab - 图片预览",
+        "description": "独立预览页面标题"
+    },
+    "preview_no_image": {
+        "message": "没有可预览的图片",
+        "description": "独立预览页面无图片提示"
     }
 }

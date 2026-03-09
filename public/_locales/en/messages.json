@@ -6,5 +6,305 @@
     "extension_description": {
         "message": "A web assistant plugin including image preview, zoom, rotate, and other image processing related functions.",
         "description": "SnapLab Description"
+    },
+    "popup_image_preview": {
+        "message": "Image Preview",
+        "description": "Popup image preview toggle label"
+    },
+    "popup_image_beautify": {
+        "message": "Image Beautify",
+        "description": "Popup image beautify toggle label"
+    },
+    "popup_click_to_close": {
+        "message": "Click to disable",
+        "description": "Toggle button close tooltip"
+    },
+    "popup_click_to_open": {
+        "message": "Click to enable",
+        "description": "Toggle button open tooltip"
+    },
+    "popup_preview_on": {
+        "message": "Preview enabled · Hover over images to show actions",
+        "description": "Preview enabled status text"
+    },
+    "popup_preview_off": {
+        "message": "Preview disabled · Default image interaction restored",
+        "description": "Preview disabled status text"
+    },
+    "popup_beautify_on": {
+        "message": "Beautify enabled · One-click beautify and export",
+        "description": "Beautify enabled status text"
+    },
+    "popup_beautify_off": {
+        "message": "Beautify disabled · Preview only",
+        "description": "Beautify disabled status text"
+    },
+    "popup_open_local_image": {
+        "message": "📁 Open Local Image",
+        "description": "Open local image button"
+    },
+    "popup_open_local_hint": {
+        "message": "Select a local image for preview / beautify / EXIF viewing",
+        "description": "Open local image hint"
+    },
+    "toolbar_preview": {
+        "message": "Preview Image",
+        "description": "Hover toolbar preview button"
+    },
+    "toolbar_beautify": {
+        "message": "Beautify Image",
+        "description": "Hover toolbar beautify button"
+    },
+    "btn_close": {
+        "message": "Close (ESC)",
+        "description": "Close button"
+    },
+    "btn_zoom_in": {
+        "message": "Zoom In",
+        "description": "Zoom in button"
+    },
+    "btn_zoom_out": {
+        "message": "Zoom Out",
+        "description": "Zoom out button"
+    },
+    "btn_rotate_left": {
+        "message": "Rotate Left",
+        "description": "Rotate left button"
+    },
+    "btn_rotate_right": {
+        "message": "Rotate Right",
+        "description": "Rotate right button"
+    },
+    "btn_flip_x": {
+        "message": "Flip Horizontal",
+        "description": "Flip horizontal button"
+    },
+    "btn_flip_y": {
+        "message": "Flip Vertical",
+        "description": "Flip vertical button"
+    },
+    "btn_reset": {
+        "message": "Reset",
+        "description": "Reset button"
+    },
+    "btn_exif": {
+        "message": "EXIF Info",
+        "description": "EXIF info button"
+    },
+    "btn_beautify": {
+        "message": "Beautify Image",
+        "description": "Beautify image button"
+    },
+    "beautify_title": {
+        "message": "Image Beautify",
+        "description": "Beautify panel title"
+    },
+    "beautify_background": {
+        "message": "Background",
+        "description": "Beautify panel background option"
+    },
+    "beautify_border_radius": {
+        "message": "Border Radius",
+        "description": "Beautify panel border radius option"
+    },
+    "beautify_padding": {
+        "message": "Padding",
+        "description": "Beautify panel padding option"
+    },
+    "beautify_shadow": {
+        "message": "Shadow",
+        "description": "Beautify panel shadow option"
+    },
+    "beautify_shadow_none": {
+        "message": "None",
+        "description": "No shadow"
+    },
+    "beautify_shadow_small": {
+        "message": "S",
+        "description": "Small shadow"
+    },
+    "beautify_shadow_medium": {
+        "message": "M",
+        "description": "Medium shadow"
+    },
+    "beautify_shadow_large": {
+        "message": "L",
+        "description": "Large shadow"
+    },
+    "beautify_copy": {
+        "message": "Copy",
+        "description": "Copy button"
+    },
+    "beautify_copied": {
+        "message": "Copied",
+        "description": "Copied status"
+    },
+    "beautify_failed": {
+        "message": "Failed",
+        "description": "Operation failed status"
+    },
+    "beautify_download": {
+        "message": "Download PNG",
+        "description": "Download button"
+    },
+    "beautify_downloaded": {
+        "message": "Downloaded",
+        "description": "Downloaded status"
+    },
+    "beautify_bg_indigo": {
+        "message": "Indigo Purple",
+        "description": "Background color name"
+    },
+    "beautify_bg_cyan_pink": {
+        "message": "Cyan Pink",
+        "description": "Background color name"
+    },
+    "beautify_bg_warm_orange": {
+        "message": "Warm Orange",
+        "description": "Background color name"
+    },
+    "beautify_bg_deep_blue": {
+        "message": "Deep Blue",
+        "description": "Background color name"
+    },
+    "beautify_bg_sunset": {
+        "message": "Sunset",
+        "description": "Background color name"
+    },
+    "beautify_bg_forest": {
+        "message": "Forest",
+        "description": "Background color name"
+    },
+    "beautify_bg_profound": {
+        "message": "Profound",
+        "description": "Background color name"
+    },
+    "beautify_bg_dark_night": {
+        "message": "Dark Night",
+        "description": "Background color name"
+    },
+    "beautify_image_load_error": {
+        "message": "Image loading failed",
+        "description": "Image load error message"
+    },
+    "exif_title": {
+        "message": "EXIF Info",
+        "description": "EXIF panel title"
+    },
+    "exif_loading": {
+        "message": "Loading…",
+        "description": "EXIF loading"
+    },
+    "exif_empty": {
+        "message": "This image contains no EXIF data",
+        "description": "No EXIF data"
+    },
+    "exif_error": {
+        "message": "Failed to read EXIF info",
+        "description": "EXIF read error"
+    },
+    "exif_make": {
+        "message": "Camera Make",
+        "description": "EXIF field"
+    },
+    "exif_model": {
+        "message": "Camera Model",
+        "description": "EXIF field"
+    },
+    "exif_lens": {
+        "message": "Lens Model",
+        "description": "EXIF field"
+    },
+    "exif_focal_length": {
+        "message": "Focal Length",
+        "description": "EXIF field"
+    },
+    "exif_fnumber": {
+        "message": "Aperture",
+        "description": "EXIF field"
+    },
+    "exif_exposure_time": {
+        "message": "Shutter Speed",
+        "description": "EXIF field"
+    },
+    "exif_iso": {
+        "message": "ISO",
+        "description": "EXIF field"
+    },
+    "exif_exposure_bias": {
+        "message": "Exposure Bias",
+        "description": "EXIF field"
+    },
+    "exif_metering_mode": {
+        "message": "Metering Mode",
+        "description": "EXIF field"
+    },
+    "exif_flash": {
+        "message": "Flash",
+        "description": "EXIF field"
+    },
+    "exif_white_balance": {
+        "message": "White Balance",
+        "description": "EXIF field"
+    },
+    "exif_date_original": {
+        "message": "Date Taken",
+        "description": "EXIF field"
+    },
+    "exif_date_modified": {
+        "message": "Date Modified",
+        "description": "EXIF field"
+    },
+    "exif_width": {
+        "message": "Width (px)",
+        "description": "EXIF field"
+    },
+    "exif_height": {
+        "message": "Height (px)",
+        "description": "EXIF field"
+    },
+    "exif_x_resolution": {
+        "message": "Horizontal Resolution",
+        "description": "EXIF field"
+    },
+    "exif_y_resolution": {
+        "message": "Vertical Resolution",
+        "description": "EXIF field"
+    },
+    "exif_color_space": {
+        "message": "Color Space",
+        "description": "EXIF field"
+    },
+    "exif_software": {
+        "message": "Software",
+        "description": "EXIF field"
+    },
+    "exif_copyright": {
+        "message": "Copyright",
+        "description": "EXIF field"
+    },
+    "exif_artist": {
+        "message": "Artist",
+        "description": "EXIF field"
+    },
+    "exif_gps_lat": {
+        "message": "GPS Latitude",
+        "description": "EXIF field"
+    },
+    "exif_gps_lng": {
+        "message": "GPS Longitude",
+        "description": "EXIF field"
+    },
+    "exif_gps_alt": {
+        "message": "GPS Altitude",
+        "description": "EXIF field"
+    },
+    "preview_page_title": {
+        "message": "SnapLab - Image Preview",
+        "description": "Standalone preview page title"
+    },
+    "preview_no_image": {
+        "message": "No image to preview",
+        "description": "Standalone preview page no image hint"
     }
 }

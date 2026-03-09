@@ -1,16 +1,22 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
+import { initLanguage, t, getLanguage, setLanguage, type Language } from '@/utils/i18n';
 
-const extensionName = browser.i18n.getMessage("extension_name");
-const extensionDesc = browser.i18n.getMessage("extension_description");
+// 语言状态 (language state)
+const currentLang = ref<Language>('zh_CN');
+const ready = ref(false);
 
-// 拦截开关状态，默认开启
+// 拦截开关状态，默认开启 (intercept toggle, default on)
 const interceptEnabled = ref(true);
-// 美化开关状态，默认开启
+// 美化开关状态，默认开启 (beautify toggle, default on)
 const beautifyEnabled = ref(true);
 
 onMounted(async () => {
-  // 从 storage 读取开关状态
+  // 初始化语言 (init language)
+  currentLang.value = await initLanguage();
+  ready.value = true;
+
+  // 从 storage 读取开关状态 (read toggle state from storage)
   const result = await browser.storage.local.get(['interceptEnabled', 'beautifyEnabled']);
   if (typeof result.interceptEnabled === 'boolean') {
     interceptEnabled.value = result.interceptEnabled;
@@ -30,7 +36,14 @@ async function toggleBeautify() {
   await browser.storage.local.set({ beautifyEnabled: beautifyEnabled.value });
 }
 
-// 打开本地图片
+// 切换语言 (switch language)
+async function toggleLanguage() {
+  const newLang: Language = currentLang.value === 'zh_CN' ? 'en' : 'zh_CN';
+  await setLanguage(newLang);
+  currentLang.value = newLang;
+}
+
+// 打开本地图片 (open local image)
 function openLocalImage() {
   const input = document.createElement('input');
   input.type = 'file';
@@ -41,14 +54,21 @@ function openLocalImage() {
     const reader = new FileReader();
     reader.onload = async () => {
       const dataUrl = reader.result as string;
-      // 发送给当前活跃标签页的 content script
-      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-      if (tab?.id) {
-        await browser.tabs.sendMessage(tab.id, {
-          type: 'snaplab:open-local-image',
-          dataUrl,
+      try {
+        const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+        if (tab?.id) {
+          await browser.tabs.sendMessage(tab.id, {
+            type: 'snaplab:open-local-image',
+            dataUrl,
+          });
+          window.close();
+        }
+      } catch {
+        // content script 不可用（如 newtab 页面），通过内部预览页面打开
+        await browser.storage.local.set({ previewImageDataUrl: dataUrl });
+        await browser.tabs.create({
+          url: browser.runtime.getURL('/preview.html'),
         });
-        // 关闭 popup
         window.close();
       }
     };
@@ -59,48 +79,58 @@ function openLocalImage() {
 </script>
 
 <template>
-  <div class="container">
+  <div class="container" v-if="ready">
     <img src="/icon/128.png" class="logo" alt="SnapLab logo" />
-    <h1 class="title">{{ extensionName }}</h1>
-    <p class="desc">{{ extensionDesc }}</p>
+    <h1 class="title">{{ t('extension_name') }}</h1>
+    <p class="desc">{{ t('extension_description') }}</p>
 
     <div class="toggle-section">
-      <span class="toggle-label">图片预览</span>
+      <span class="toggle-label">{{ t('popup_image_preview') }}</span>
       <button
         class="toggle-btn"
         :class="{ active: interceptEnabled }"
         @click="toggleIntercept"
-        :title="interceptEnabled ? '点击关闭' : '点击开启'"
+        :title="interceptEnabled ? t('popup_click_to_close') : t('popup_click_to_open')"
       >
         <span class="toggle-knob" />
       </button>
     </div>
 
     <div class="toggle-section">
-      <span class="toggle-label">图片美化</span>
+      <span class="toggle-label">{{ t('popup_image_beautify') }}</span>
       <button
         class="toggle-btn"
         :class="{ active: beautifyEnabled }"
         @click="toggleBeautify"
-        :title="beautifyEnabled ? '点击关闭' : '点击开启'"
+        :title="beautifyEnabled ? t('popup_click_to_close') : t('popup_click_to_open')"
       >
         <span class="toggle-knob" />
       </button>
     </div>
 
     <p class="status-text">
-      {{ interceptEnabled ? '预览已开启 · 悬停图片显示操作菜单' : '预览已关闭 · 图片交互恢复默认' }}
+      {{ interceptEnabled ? t('popup_preview_on') : t('popup_preview_off') }}
     </p>
     <p class="status-text" v-if="interceptEnabled">
-      {{ beautifyEnabled ? '美化已开启 · 可一键美化导出图片' : '美化已关闭 · 仅保留预览功能' }}
+      {{ beautifyEnabled ? t('popup_beautify_on') : t('popup_beautify_off') }}
     </p>
 
     <div class="divider"></div>
 
     <button class="open-local-btn" @click="openLocalImage">
-      📁 打开本地图片
+      {{ t('popup_open_local_image') }}
     </button>
-    <p class="status-text">选择本地图片进行预览 / 美化 / EXIF 查看</p>
+    <p class="status-text">{{ t('popup_open_local_hint') }}</p>
+
+    <div class="divider"></div>
+
+    <!-- 语言切换 (language switch) -->
+    <div class="toggle-section">
+      <span class="toggle-label">{{ t('lang_label') }}</span>
+      <button class="lang-btn" @click="toggleLanguage">
+        {{ currentLang === 'zh_CN' ? '中文 → EN' : 'EN → 中文' }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -129,7 +159,7 @@ function openLocalImage() {
   margin: 0 0 20px 0;
 }
 
-/* 开关区域 */
+/* 开关区域 (toggle section) */
 .toggle-section {
   display: flex;
   align-items: center;
@@ -143,7 +173,7 @@ function openLocalImage() {
   color: #444;
 }
 
-/* 开关按钮 */
+/* 开关按钮 (toggle button) */
 .toggle-btn {
   position: relative;
   width: 48px;
@@ -174,21 +204,21 @@ function openLocalImage() {
   transform: translateX(22px);
 }
 
-/* 状态提示文字 */
+/* 状态提示文字 (status text) */
 .status-text {
   font-size: 12px;
   color: #999;
   margin: 0;
 }
 
-/* 分隔线 */
+/* 分隔线 (divider) */
 .divider {
   height: 1px;
   background: #e0e0e0;
   margin: 16px 0;
 }
 
-/* 打开本地图片按钮 */
+/* 打开本地图片按钮 (open local image button) */
 .open-local-btn {
   width: 100%;
   padding: 10px 16px;
@@ -206,6 +236,22 @@ function openLocalImage() {
   border-color: #ccc;
 }
 
+/* 语言切换按钮 (language switch button) */
+.lang-btn {
+  padding: 4px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #f5f5f5;
+  color: #333;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.lang-btn:hover {
+  background: #e8e8e8;
+  border-color: #ccc;
+}
+
 @media (prefers-color-scheme: dark) {
   .title { color: #eee; }
   .desc { color: #ccc; }
@@ -218,6 +264,15 @@ function openLocalImage() {
     color: #ddd;
   }
   .open-local-btn:hover {
+    background: #444;
+    border-color: #666;
+  }
+  .lang-btn {
+    background: #333;
+    border-color: #555;
+    color: #ddd;
+  }
+  .lang-btn:hover {
     background: #444;
     border-color: #666;
   }
