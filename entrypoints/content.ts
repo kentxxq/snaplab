@@ -170,7 +170,8 @@ export default defineContentScript({
 
       let parent = el.parentElement;
       let depth = 0;
-      while (parent && depth < 3) {
+      // 限制向上遍历的深度和范围，防止通过 shadow host 遍历到 body 然后 querySelector 找到无关图片
+      while (parent && depth < 3 && parent !== document.body && parent !== document.documentElement) {
         if (parent.tagName === 'IMG') {
           return isImageLargeEnough(parent as HTMLImageElement) ? (parent as HTMLImageElement) : null;
         }
@@ -195,6 +196,7 @@ export default defineContentScript({
     let toolbarUi: Awaited<ReturnType<typeof createShadowRootUi>> | null = null;
     let currentHoverTarget: HTMLElement | null = null;
     let currentHoverImageUrl: string | null = null;
+    let toolbarShadowHost: HTMLElement | null = null;
     // 代数计数器，防止异步竞争导致多个工具栏
     let toolbarGeneration = 0;
 
@@ -277,6 +279,7 @@ export default defineContentScript({
       }
 
       toolbarUi = newUi;
+      toolbarShadowHost = newUi.shadowHost;
       toolbarUi.mount();
     }
 
@@ -290,6 +293,7 @@ export default defineContentScript({
       }
       currentHoverTarget = null;
       currentHoverImageUrl = null;
+      toolbarShadowHost = null;
     }
 
     /**
@@ -312,6 +316,11 @@ export default defineContentScript({
       const target = e.target as HTMLElement;
       if (!target) return;
 
+      // 如果目标是工具栏本身或其内部元素，直接忽略
+      if (toolbarShadowHost && (toolbarShadowHost === target || toolbarShadowHost.contains(target))) {
+        return;
+      }
+
       const img = findHoverableImage(target);
       if (img) {
         const imageUrl = getImageUrl(img);
@@ -321,7 +330,7 @@ export default defineContentScript({
       }
     });
 
-    // mousemove：鼠标远离图片超过 150px 时隐藏
+    // mousemove：鼠标远离图片超过 60px 时隐藏
     let lastMoveCheck = 0;
     document.addEventListener('mousemove', (e: MouseEvent) => {
       if (!currentHoverTarget || !toolbarUi) return;

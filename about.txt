@@ -4,7 +4,7 @@ It allows you to preview images directly on the current web page without opening
 
 Whether you are browsing social media, reading articles, or searching for inspiration, SnapLab ensures that images are handled exactly how you want to see them, quickly and smoothly.
 
-While we currently prioritize image-centric features, we are expanding to support more web elements like links and advanced content tools. Expect more powerful features such as image beautification, format conversion, and enhanced web utilities in the future.
+Currently, we support core image features such as image beautification, EXIF metadata viewing, and localized previewing. More powerful features such as format conversion and enhanced web utilities are on the way, constantly improving your user experience.
 
 Experience a faster and more intuitive way to navigate the web with SnapLab.
 
@@ -16,6 +16,6 @@ SnapLab 是一款网页助手插件，旨在提升您的在线体验，目前专
 
 无论您是在浏览社交媒体、阅读文章还是寻找灵感，SnapLab 都能确保图片以您期望的方式快速、流畅地呈现。
 
-虽然我们目前优先处理图片相关功能，但我们正在扩展以支持更多网页元素（如链接）和高级内容处理工具。未来将推出图片美化、格式转换、增强型网页工具等更多强大功能，不断改进您的使用体验。
+目前已支持图片美化、EXIF 元数据查看和本地预览，未来将推出格式转换、增强型网页工具等更多强大功能，不断改进您的使用体验。
 
 使用 SnapLab，体验更快速、更直观的网页浏览方式。
