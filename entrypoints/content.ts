@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 import ImagePreview from '@/components/ImagePreview.vue';
 import ImageHoverToolbar from '@/components/ImageHoverToolbar.vue';
-import ImageBeautify from '@/components/ImageBeautify.vue';
+
 import type { ToolbarAction } from '@/components/ImageHoverToolbar.vue';
 import { initLanguage, t } from '@/utils/i18n';
 import { upgradeImageUrl } from '@/utils/imageUrlResolvers';
@@ -72,10 +72,10 @@ export default defineContentScript({
               closePreview();
             },
             onBeautify: () => {
-              // 先关闭预览，再打开美化
+              // 先关闭预览，再打开美化页面
               const urlToBeautify = imageUrl;
               closePreview();
-              setTimeout(() => showBeautify(urlToBeautify), 50);
+              openBeautifyPage(urlToBeautify);
             },
           });
           app.mount(appRoot);
@@ -98,47 +98,12 @@ export default defineContentScript({
       uiMounted = false;
     }
 
-    // ========== 美化相关 ==========
-    let beautifyUi: Awaited<ReturnType<typeof createShadowRootUi>> | null = null;
-
-    async function showBeautify(imageUrl: string) {
-      if (beautifyUi) {
-        beautifyUi.remove();
-        beautifyUi = null;
-      }
-
-      beautifyUi = await createShadowRootUi(ctx, {
-        name: 'image-beautify',
-        position: 'overlay',
-        zIndex: 2147483647,
-        onMount(container) {
-          const appRoot = document.createElement('div');
-          container.append(appRoot);
-
-          const app = createApp(ImageBeautify, {
-            src: imageUrl,
-            onClose: () => {
-              closeBeautify();
-            },
-          });
-          app.mount(appRoot);
-          return app;
-        },
-        onRemove(app) {
-          app?.unmount();
-        },
-      });
-
-      beautifyUi.mount();
-      uiMounted = true;
-    }
-
-    function closeBeautify() {
-      if (beautifyUi) {
-        beautifyUi.remove();
-        beautifyUi = null;
-      }
-      uiMounted = false;
+    // ========== 美化相关：打开独立页面 ==========
+    async function openBeautifyPage(imageUrl: string) {
+      // 将图片 URL 存入 storage，美化页面从 storage 读取
+      await browser.storage.local.set({ beautifyImageUrl: imageUrl });
+      // content script 无法直接 window.open chrome-extension:// URL，需通过 background 打开
+      browser.runtime.sendMessage({ type: 'snaplab:open-beautify-page' });
     }
 
     // ========== 图片检测与 URL 提取 ==========
@@ -260,7 +225,7 @@ export default defineContentScript({
               } else if (actionId === 'beautify' && currentHoverImageUrl) {
                 const urlToBeautify = currentHoverImageUrl;
                 hideToolbar();
-                setTimeout(() => showBeautify(urlToBeautify), 50);
+                openBeautifyPage(urlToBeautify);
               }
             },
           });

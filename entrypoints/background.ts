@@ -4,6 +4,13 @@ export default defineBackground(() => {
   // 监听来自 content script 的消息，代理 fetch 请求绕过 CORS 限制
   // (Listen for messages from content script, proxy fetch requests to bypass CORS)
   browser.runtime.onMessage.addListener((message: any, _sender, sendResponse) => {
+    // 打开美化页面（content script 无法直接打开 chrome-extension:// URL）
+    if (message?.type === 'snaplab:open-beautify-page') {
+      const url = browser.runtime.getURL('/beautify.html');
+      browser.tabs.create({ url });
+      return;
+    }
+
     if (message?.type === 'snaplab:fetch-image-data') {
       const url = message.url as string;
 

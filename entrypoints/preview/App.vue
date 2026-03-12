@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import ImagePreview from '@/components/ImagePreview.vue';
-import ImageBeautify from '@/components/ImageBeautify.vue';
 import { initLanguage, t } from '@/utils/i18n';
 
 const imageUrl = ref<string | null>(null);
 const showPreview = ref(false);
-const showBeautify = ref(false);
 const beautifyEnabled = ref(true);
 
 onMounted(async () => {
@@ -25,8 +23,14 @@ onMounted(async () => {
 });
 
 function closePreview() { showPreview.value = false; }
-function openBeautify() { showPreview.value = false; showBeautify.value = true; }
-function closeBeautify() { showBeautify.value = false; }
+
+async function openBeautify() {
+  if (!imageUrl.value) return;
+  // 将图片 URL 存入 storage，然后打开美化页面
+  await browser.storage.local.set({ beautifyImageUrl: imageUrl.value });
+  const beautifyPageUrl = browser.runtime.getURL('/beautify.html');
+  window.open(beautifyPageUrl, '_blank');
+}
 </script>
 
 <template>
@@ -35,7 +39,6 @@ function closeBeautify() { showBeautify.value = false; }
       <p>{{ t('preview_no_image') }}</p>
     </div>
     <ImagePreview v-if="showPreview && imageUrl" :src="imageUrl" :beautifyEnabled="beautifyEnabled" @close="closePreview" @beautify="openBeautify" />
-    <ImageBeautify v-if="showBeautify && imageUrl" :src="imageUrl" @close="closeBeautify" />
   </div>
 </template>
 
@@ -47,3 +50,4 @@ function closeBeautify() { showBeautify.value = false; }
   font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 </style>
+
