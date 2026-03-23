@@ -51,10 +51,35 @@ export default defineContentScript({
     let uiMounted = false;
     let ui: Awaited<ReturnType<typeof createShadowRootUi>> | null = null;
 
+    // 收集页面中所有符合条件的图片 URL (collect all eligible image URLs on the page)
+    function collectPageImageUrls(): string[] {
+      const imgs = document.querySelectorAll('img');
+      const urls: string[] = [];
+      const seen = new Set<string>();
+      imgs.forEach(img => {
+        if (!isImageLargeEnough(img)) return;
+        const url = getImageUrl(img);
+        if (url && !seen.has(url)) {
+          seen.add(url);
+          urls.push(url);
+        }
+      });
+      return urls;
+    }
+
     async function showPreview(imageUrl: string) {
       if (ui) {
         ui.remove();
         ui = null;
+      }
+
+      // 收集页面图片并确定当前索引 (collect page images and determine current index)
+      const images = collectPageImageUrls();
+      let currentIndex = images.indexOf(imageUrl);
+      if (currentIndex === -1) {
+        // 当前图片不在列表中（如本地图片），插入到开头
+        images.unshift(imageUrl);
+        currentIndex = 0;
       }
 
       ui = await createShadowRootUi(ctx, {
@@ -68,6 +93,8 @@ export default defineContentScript({
           const app = createApp(ImagePreview, {
             src: imageUrl,
             beautifyEnabled: beautifyEnabled,
+            images: images,
+            currentIndex: currentIndex,
             onClose: () => {
               closePreview();
             },
@@ -77,6 +104,7 @@ export default defineContentScript({
               closePreview();
               openBeautifyPage(urlToBeautify);
             },
+
           });
           app.mount(appRoot);
           return app;

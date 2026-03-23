@@ -6,6 +6,8 @@ import { initLanguage, t } from '@/utils/i18n';
 const props = defineProps<{
   src: string;
   beautifyEnabled?: boolean;
+  images?: string[];
+  currentIndex?: number;
 }>();
 
 const emit = defineEmits<{
@@ -13,8 +15,27 @@ const emit = defineEmits<{
   beautify: [];
 }>();
 
+// 内部管理当前图片索引 (internally managed current image index)
+const internalIndex = ref(props.currentIndex ?? 0);
+const displaySrc = computed(() => {
+  if (props.images && props.images.length > 0) {
+    return props.images[internalIndex.value] ?? props.src;
+  }
+  return props.src;
+});
+
 // EXIF 面板显示状态 (EXIF panel visibility)
 const showInfo = ref(false);
+
+// 边界提示 toast (boundary toast)
+const toastMessage = ref('');
+let toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+function showToast(msg: string) {
+  toastMessage.value = msg;
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toastMessage.value = ''; }, 1500);
+}
 
 // 图片变换状态 (image transform state)
 const scale = ref(1);
@@ -80,8 +101,32 @@ function handleMouseMove(e: MouseEvent) {
 
 function handleMouseUp() { isDragging.value = false; }
 
+function navigatePrev() {
+  if (!props.images || props.images.length <= 1) return;
+  if (internalIndex.value <= 0) {
+    showToast(t('preview_first_image'));
+    return;
+  }
+  resetTransform();
+  showInfo.value = false;
+  internalIndex.value--;
+}
+
+function navigateNext() {
+  if (!props.images || props.images.length <= 1) return;
+  if (internalIndex.value >= props.images.length - 1) {
+    showToast(t('preview_last_image'));
+    return;
+  }
+  resetTransform();
+  showInfo.value = false;
+  internalIndex.value++;
+}
+
 function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape') emit('close');
+  if (e.key === 'Escape') { emit('close'); return; }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); navigatePrev(); return; }
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); navigateNext(); return; }
 }
 
 function handleOverlayClick(e: MouseEvent) {
@@ -107,7 +152,7 @@ onBeforeUnmount(() => {
     <button class="close-btn" @click="emit('close')" :title="t('btn_close')">✕</button>
 
     <div class="image-container">
-      <img :src="props.src" :style="{ transform: imageTransform, cursor: isDragging ? 'grabbing' : 'grab' }" class="preview-image" @mousedown="handleMouseDown" draggable="false" />
+      <img :src="displaySrc" :style="{ transform: imageTransform, cursor: isDragging ? 'grabbing' : 'grab' }" class="preview-image" @mousedown="handleMouseDown" draggable="false" />
     </div>
 
     <div class="toolbar" @click.stop>
@@ -156,7 +201,24 @@ onBeforeUnmount(() => {
       </template>
     </div>
 
-    <ImageInfoPanel v-if="showInfo" :src="props.src" @close="showInfo = false" />
+    <ImageInfoPanel v-if="showInfo" :src="displaySrc" @close="showInfo = false" />
+
+    <!-- 左右导航箭头按钮 (prev/next navigation arrows) -->
+    <template v-if="props.images && props.images.length > 1">
+      <button class="nav-btn nav-prev" @click.stop="navigatePrev" :title="'←'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="nav-btn nav-next" @click.stop="navigateNext" :title="'→'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <!-- 图片计数器 (image counter) -->
+      <div class="image-counter">{{ internalIndex + 1 }} / {{ props.images.length }}</div>
+    </template>
+
+    <!-- 边界提示 toast (boundary toast) -->
+    <Transition name="toast">
+      <div v-if="toastMessage" class="preview-toast">{{ toastMessage }}</div>
+    </Transition>
   </div>
 </template>
 
@@ -206,4 +268,38 @@ onBeforeUnmount(() => {
 .toolbar-divider {
   width: 1px; height: 20px; background: rgba(255, 255, 255, 0.2); margin: 0 4px;
 }
+
+/* 导航按钮 (navigation buttons) */
+.nav-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 44px; height: 44px; border-radius: 50%; border: none;
+  background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.7);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; backdrop-filter: blur(8px);
+}
+.nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: #fff; }
+.nav-prev { left: 16px; }
+.nav-next { right: 16px; }
+
+/* 图片计数器 (image counter) */
+.image-counter {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  padding: 4px 14px; border-radius: 16px;
+  background: rgba(30, 30, 30, 0.7); backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.8); font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  pointer-events: none; user-select: none;
+}
+
+/* 边界提示 toast (boundary toast) */
+.preview-toast {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  padding: 10px 24px; border-radius: 8px;
+  background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(12px);
+  color: #fff; font-size: 14px; pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+.toast-enter-active { transition: opacity 0.2s ease; }
+.toast-leave-active { transition: opacity 0.4s ease; }
+.toast-enter-from, .toast-leave-to { opacity: 0; }
 </style>
