@@ -8,9 +8,9 @@ tasks:
     cmds:
       - rm -rf dist
       - echo "📦 正在打包 Chrome 扩展..."
-      - pnpm zip
+      - vp run zip
       - echo "📦 正在打包 Edge 扩展..."
-      - pnpm zip -b edge
+      - vp run zip -b edge
       - echo "✅ 打包完成！"
     silent: true
 
@@ -18,10 +18,11 @@ tasks:
     desc: 清理 + 打包 + 发布到 Chrome 和 Edge 商店
     cmds:
       - rm -rf dist
-      - pnpm zip
-      - pnpm zip -b edge
+      - vp run zip
+      - vp run zip -b edge
       - echo "🚀 正在发布到 Chrome 和 Edge 商店..."
-      - pnpm wxt submit
+      - >
+        vpx wxt submit
         --chrome-zip dist/snaplab-*-chrome.zip
         --edge-zip dist/snaplab-*-edge.zip
       - echo "✅ 发布完成！"
@@ -31,9 +32,10 @@ tasks:
     desc: 清理 + 打包 + 发布到 Chrome 商店
     cmds:
       - rm -rf dist
-      - pnpm zip
+      - vp run zip
       - echo "🚀 正在发布到 Chrome 商店..."
-      - pnpm wxt submit
+      - >
+        vpx wxt submit
         --chrome-zip dist/snaplab-*-chrome.zip
       - echo "✅ Chrome 发布完成！"
     silent: true
@@ -42,9 +44,10 @@ tasks:
     desc: 清理 + 打包 + 发布到 Edge 商店
     cmds:
       - rm -rf dist
-      - pnpm zip -b edge
+      - vp run zip -b edge
       - echo "🚀 正在发布到 Edge 商店..."
-      - pnpm wxt submit
+      - >
+        vpx wxt submit
         --edge-zip dist/snaplab-*-edge.zip
       - echo "✅ Edge 发布完成！"
     silent: true
