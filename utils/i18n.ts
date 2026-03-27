@@ -105,6 +105,8 @@ const messages: Record<Language, Record<string, string>> = {
     beautify_page_title: "SnapLab - 图片美化",
     beautify_no_image: "没有可美化的图片",
     lang_label: "语言",
+    popup_tab_home: "功能",
+    popup_tab_settings: "设置",
     preview_first_image: "已经是第一张了",
     preview_last_image: "已经是最后一张了",
 
@@ -220,6 +222,8 @@ const messages: Record<Language, Record<string, string>> = {
     beautify_page_title: "SnapLab - Image Beautify",
     beautify_no_image: "No image to beautify",
     lang_label: "Language",
+    popup_tab_home: "Features",
+    popup_tab_settings: "Settings",
     preview_first_image: "Already the first image",
     preview_last_image: "Already the last image",
 

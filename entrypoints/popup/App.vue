@@ -6,6 +6,9 @@ import { initLanguage, t, getLanguage, setLanguage, type Language } from "@/util
 const currentLang = ref<Language>("zh_CN");
 const ready = ref(false);
 
+// 新增 Menu 状态 (Menu Tabs)
+const activeTab = ref<"home" | "settings">("home");
+
 // 拦截开关状态，默认开启 (intercept toggle, default on)
 const interceptEnabled = ref(true);
 // 美化开关状态，默认开启 (beautify toggle, default on)
@@ -149,125 +152,180 @@ function openLocalImage() {
 
 <template>
   <div class="container" v-if="ready">
-    <img src="/icon/128.png" class="logo" alt="SnapLab logo" />
-    <h1 class="title">{{ t("extension_name") }}</h1>
-    <p class="desc">{{ t("extension_description") }}</p>
-
-    <div class="toggle-section">
-      <span class="toggle-label">{{ t("popup_image_preview") }}</span>
-      <button
-        class="toggle-btn"
-        :class="{ active: interceptEnabled }"
-        @click="toggleIntercept"
-        :title="interceptEnabled ? t('popup_click_to_close') : t('popup_click_to_open')"
-      >
-        <span class="toggle-knob" />
-      </button>
-    </div>
-
-    <div class="toggle-section">
-      <span class="toggle-label">{{ t("popup_image_beautify") }}</span>
-      <button
-        class="toggle-btn"
-        :class="{ active: beautifyEnabled }"
-        @click="toggleBeautify"
-        :title="beautifyEnabled ? t('popup_click_to_close') : t('popup_click_to_open')"
-      >
-        <span class="toggle-knob" />
-      </button>
-    </div>
-
-    <p class="status-text">
-      {{ interceptEnabled ? t("popup_preview_on") : t("popup_preview_off") }}
-    </p>
-    <p class="status-text" v-if="interceptEnabled">
-      {{ beautifyEnabled ? t("popup_beautify_on") : t("popup_beautify_off") }}
-    </p>
-
-    <div class="divider"></div>
-
-    <!-- 策略配置 (Strategy Config) -->
-    <div class="strategy-section">
-      <div class="strategy-header">{{ t("popup_strategy_title") }}</div>
-      <select v-model="toolbarStrategy" @change="updateStrategy" class="strategy-select">
-        <option value="open_all">{{ t("strategy_open_all") }}</option>
-        <option value="close_all">{{ t("strategy_close_all") }}</option>
-        <option value="close_with_whitelist">{{ t("strategy_close_with_whitelist") }}</option>
-        <option value="open_with_blacklist">{{ t("strategy_open_with_blacklist") }}</option>
-      </select>
-
-      <div class="site-actions" v-if="currentHost">
-        <div class="current-host">{{ currentHost }}</div>
-        <div class="action-buttons">
-          <button
-            class="site-btn"
-            :class="{ active: isCurrentInWhitelist }"
-            @click="toggleWhitelist"
-          >
-            {{ isCurrentInWhitelist ? t("site_remove_whitelist") : t("site_add_whitelist") }}
-          </button>
-          <button
-            class="site-btn"
-            :class="{ active: isCurrentInBlacklist }"
-            @click="toggleBlacklist"
-          >
-            {{ isCurrentInBlacklist ? t("site_remove_blacklist") : t("site_add_blacklist") }}
-          </button>
-        </div>
+    <!-- Header with Tabs -->
+    <div class="header">
+      <div class="header-left">
+        <img src="/icon/128.png" class="logo-small" alt="SnapLab logo" />
+        <span class="title-small">{{ t("extension_name") }}</span>
+      </div>
+      <div class="tabs">
+        <button class="tab-btn" :class="{ active: activeTab === 'home' }" @click="activeTab = 'home'">
+          {{ t("popup_tab_home") }}
+        </button>
+        <button class="tab-btn" :class="{ active: activeTab === 'settings' }" @click="activeTab = 'settings'">
+          {{ t("popup_tab_settings") }}
+        </button>
       </div>
     </div>
 
-    <div class="divider"></div>
+    <!-- Home Tab -->
+    <div v-show="activeTab === 'home'" class="tab-content">
+      <div class="feature-item">
+        <div class="toggle-section" style="margin-bottom: 6px;">
+          <span class="toggle-label">{{ t("popup_image_preview") }}</span>
+          <button
+            class="toggle-btn"
+            :class="{ active: interceptEnabled }"
+            @click="toggleIntercept"
+            :title="interceptEnabled ? t('popup_click_to_close') : t('popup_click_to_open')"
+          >
+            <span class="toggle-knob" />
+          </button>
+        </div>
+        <div class="feature-desc">
+          {{ interceptEnabled ? t("popup_preview_on") : t("popup_preview_off") }}
+        </div>
+      </div>
 
-    <button class="open-local-btn" @click="openLocalImage">
-      {{ t("popup_open_local_image") }}
-    </button>
-    <p class="status-text">{{ t("popup_open_local_hint") }}</p>
+      <div class="feature-item">
+        <div class="toggle-section" style="margin-bottom: 6px;">
+          <span class="toggle-label">{{ t("popup_image_beautify") }}</span>
+          <button
+            class="toggle-btn"
+            :class="{ active: beautifyEnabled }"
+            @click="toggleBeautify"
+            :title="beautifyEnabled ? t('popup_click_to_close') : t('popup_click_to_open')"
+          >
+            <span class="toggle-knob" />
+          </button>
+        </div>
+        <div class="feature-desc">
+          {{ beautifyEnabled ? t("popup_beautify_on") : t("popup_beautify_off") }}
+        </div>
+      </div>
 
-    <div class="divider"></div>
+      <div class="divider"></div>
 
-    <!-- 语言切换 (language switch) -->
-    <div class="toggle-section">
-      <span class="toggle-label">{{ t("lang_label") }}</span>
-      <button class="lang-btn" @click="toggleLanguage">
-        {{ currentLang === "zh_CN" ? "中文 → EN" : "EN → 中文" }}
+      <button class="open-local-btn" @click="openLocalImage">
+        {{ t("popup_open_local_image") }}
       </button>
+      <p class="status-text">{{ t("popup_open_local_hint") }}</p>
+    </div>
+
+    <!-- Settings Tab -->
+    <div v-show="activeTab === 'settings'" class="tab-content">
+      <!-- 策略配置 (Strategy Config) -->
+      <div class="strategy-section">
+        <div class="strategy-header">{{ t("popup_strategy_title") }}</div>
+        <select v-model="toolbarStrategy" @change="updateStrategy" class="strategy-select">
+          <option value="open_all">{{ t("strategy_open_all") }}</option>
+          <option value="close_all">{{ t("strategy_close_all") }}</option>
+          <option value="close_with_whitelist">{{ t("strategy_close_with_whitelist") }}</option>
+          <option value="open_with_blacklist">{{ t("strategy_open_with_blacklist") }}</option>
+        </select>
+
+        <div class="site-actions" v-if="currentHost">
+          <div class="current-host">{{ currentHost }}</div>
+          <div class="action-buttons">
+            <button
+              class="site-btn"
+              :class="{ active: isCurrentInWhitelist }"
+              @click="toggleWhitelist"
+            >
+              {{ isCurrentInWhitelist ? t("site_remove_whitelist") : t("site_add_whitelist") }}
+            </button>
+            <button
+              class="site-btn"
+              :class="{ active: isCurrentInBlacklist }"
+              @click="toggleBlacklist"
+            >
+              {{ isCurrentInBlacklist ? t("site_remove_blacklist") : t("site_add_blacklist") }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 语言切换 (language switch) -->
+      <div class="toggle-section">
+        <span class="toggle-label">{{ t("lang_label") }}</span>
+        <button class="lang-btn" @click="toggleLanguage">
+          {{ currentLang === "zh_CN" ? "中文 → EN" : "EN → 中文" }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .container {
-  width: 300px;
-  padding: 24px 16px;
-  text-align: center;
+  width: 320px;
+  box-sizing: border-box;
+  padding: 16px;
+  text-align: left;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
-.logo {
-  width: 80px;
-  height: 80px;
+
+/* Header & Tabs */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 12px;
 }
-.title {
-  font-size: 20px;
-  font-weight: bold;
-  margin: 0 0 8px 0;
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo-small {
+  width: 24px;
+  height: 24px;
+}
+.title-small {
+  font-size: 15px;
+  font-weight: 600;
   color: #333;
 }
-.desc {
-  font-size: 14px;
+.tabs {
+  display: flex;
+  background: #f0f0f0;
+  border-radius: 6px;
+  padding: 2px;
+}
+.tab-btn {
+  padding: 4px 10px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
   color: #666;
-  line-height: 1.5;
-  margin: 0 0 20px 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab-btn.active {
+  background: #fff;
+  color: #333;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.tab-content {
+  animation: fadeIn 0.15s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* 开关区域 (toggle section) */
 .toggle-section {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 .toggle-label {
   font-size: 14px;
@@ -310,20 +368,34 @@ function openLocalImage() {
 .status-text {
   font-size: 12px;
   color: #999;
-  margin: 0;
+  margin: 4px 0 0 0;
+}
+
+/* Feature Item */
+.feature-item {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  transition: opacity 0.3s;
+}
+.feature-desc {
+  font-size: 11px;
+  color: #888;
+  line-height: 1.4;
 }
 
 /* 分隔线 (divider) */
 .divider {
   height: 1px;
   background: #e0e0e0;
-  margin: 16px 0;
+  margin: 12px 0;
 }
 
 /* 打开本地图片按钮 (open local image button) */
 .open-local-btn {
   width: 100%;
-  padding: 10px 16px;
+  padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 8px;
   background: #f5f5f5;
@@ -331,7 +403,7 @@ function openLocalImage() {
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .open-local-btn:hover {
   background: #e8e8e8;
@@ -359,8 +431,8 @@ function openLocalImage() {
   text-align: left;
   background: #f8f9fa;
   border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
+  padding: 10px;
+  margin-bottom: 12px;
 }
 .strategy-header {
   font-size: 13px;
@@ -409,11 +481,21 @@ function openLocalImage() {
 }
 
 @media (prefers-color-scheme: dark) {
-  .title {
+  .header {
+    border-bottom-color: #444;
+  }
+  .title-small {
     color: #eee;
   }
-  .desc {
-    color: #ccc;
+  .tabs {
+    background: #2a2a2a;
+  }
+  .tab-btn {
+    color: #999;
+  }
+  .tab-btn.active {
+    background: #555;
+    color: #eee;
   }
   .toggle-label {
     color: #ddd;
@@ -448,9 +530,14 @@ function openLocalImage() {
   .status-text {
     color: #888;
   }
-
   .strategy-section {
     background: #2a2a2a;
+  }
+  .feature-item {
+    background: #2a2a2a;
+  }
+  .feature-desc {
+    color: #888;
   }
   .strategy-header {
     color: #eee;
