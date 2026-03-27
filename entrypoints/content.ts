@@ -1,11 +1,11 @@
-import { createApp } from 'vue';
-import ImagePreview from '@/components/ImagePreview.vue';
-import ImageHoverToolbar from '@/components/ImageHoverToolbar.vue';
+import { createApp } from "vue";
+import ImagePreview from "@/components/ImagePreview.vue";
+import ImageHoverToolbar from "@/components/ImageHoverToolbar.vue";
 
-import type { ToolbarAction } from '@/components/ImageHoverToolbar.vue';
-import { initLanguage, t } from '@/utils/i18n';
-import { upgradeImageUrl } from '@/utils/imageUrlResolvers';
-import '~/assets/main.css';
+import type { ToolbarAction } from "@/components/ImageHoverToolbar.vue";
+import { initLanguage, t } from "@/utils/i18n";
+import { upgradeImageUrl } from "@/utils/imageUrlResolvers";
+import "~/assets/main.css";
 
 // 放大镜 SVG 图标
 const ICON_PREVIEW = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`;
@@ -14,8 +14,8 @@ const ICON_PREVIEW = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height=
 const ICON_BEAUTIFY = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/></svg>`;
 
 export default defineContentScript({
-  matches: ['<all_urls>'],
-  cssInjectionMode: 'ui',
+  matches: ["<all_urls>"],
+  cssInjectionMode: "ui",
 
   async main(ctx) {
     // 初始化语言设置 (init language)
@@ -25,24 +25,44 @@ export default defineContentScript({
     let interceptEnabled = true;
     let beautifyEnabled = true;
 
-    const result = await browser.storage.local.get(['interceptEnabled', 'beautifyEnabled']);
-    if (typeof result.interceptEnabled === 'boolean') {
+    // ========== 策略状态 ==========
+    let toolbarStrategy = "open_with_blacklist";
+    let toolbarWhitelist: string[] = [];
+    let toolbarBlacklist: string[] = [];
+
+    const result = await browser.storage.local.get([
+      "interceptEnabled",
+      "beautifyEnabled",
+      "toolbarStrategy",
+      "toolbarWhitelist",
+      "toolbarBlacklist",
+    ]);
+    if (typeof result.interceptEnabled === "boolean") {
       interceptEnabled = result.interceptEnabled;
     }
-    if (typeof result.beautifyEnabled === 'boolean') {
+    if (typeof result.beautifyEnabled === "boolean") {
       beautifyEnabled = result.beautifyEnabled;
     }
+    if (result.toolbarStrategy) toolbarStrategy = result.toolbarStrategy as string;
+    if (result.toolbarWhitelist) toolbarWhitelist = result.toolbarWhitelist as string[];
+    if (result.toolbarBlacklist) toolbarBlacklist = result.toolbarBlacklist as string[];
 
     browser.storage.onChanged.addListener((changes, areaName) => {
-      if (areaName === 'local') {
+      if (areaName === "local") {
         if (changes.interceptEnabled !== undefined) {
           interceptEnabled = changes.interceptEnabled.newValue as boolean;
-          if (!interceptEnabled) {
-            hideToolbar();
-          }
         }
         if (changes.beautifyEnabled !== undefined) {
           beautifyEnabled = changes.beautifyEnabled.newValue as boolean;
+        }
+        if (changes.toolbarStrategy !== undefined) {
+          toolbarStrategy = changes.toolbarStrategy.newValue as string;
+        }
+        if (changes.toolbarWhitelist !== undefined) {
+          toolbarWhitelist = (changes.toolbarWhitelist.newValue as string[]) || [];
+        }
+        if (changes.toolbarBlacklist !== undefined) {
+          toolbarBlacklist = (changes.toolbarBlacklist.newValue as string[]) || [];
         }
       }
     });
@@ -53,10 +73,10 @@ export default defineContentScript({
 
     // 收集页面中所有符合条件的图片 URL (collect all eligible image URLs on the page)
     function collectPageImageUrls(): string[] {
-      const imgs = document.querySelectorAll('img');
+      const imgs = document.querySelectorAll("img");
       const urls: string[] = [];
       const seen = new Set<string>();
-      imgs.forEach(img => {
+      imgs.forEach((img) => {
         if (!isImageLargeEnough(img)) return;
         const url = getImageUrl(img);
         if (url && !seen.has(url)) {
@@ -83,11 +103,11 @@ export default defineContentScript({
       }
 
       ui = await createShadowRootUi(ctx, {
-        name: 'image-preview',
-        position: 'overlay',
+        name: "image-preview",
+        position: "overlay",
         zIndex: 2147483647,
         onMount(container) {
-          const appRoot = document.createElement('div');
+          const appRoot = document.createElement("div");
           container.append(appRoot);
 
           const app = createApp(ImagePreview, {
@@ -104,7 +124,6 @@ export default defineContentScript({
               closePreview();
               openBeautifyPage(urlToBeautify);
             },
-
           });
           app.mount(appRoot);
           return app;
@@ -131,7 +150,7 @@ export default defineContentScript({
       // 将图片 URL 存入 storage，美化页面从 storage 读取
       await browser.storage.local.set({ beautifyImageUrl: imageUrl });
       // content script 无法直接 window.open chrome-extension:// URL，需通过 background 打开
-      browser.runtime.sendMessage({ type: 'snaplab:open-beautify-page' });
+      browser.runtime.sendMessage({ type: "snaplab:open-beautify-page" });
     }
 
     // ========== 图片检测与 URL 提取 ==========
@@ -140,7 +159,7 @@ export default defineContentScript({
       const src = img.src || img.currentSrc;
       if (src) return upgradeImageUrl(src);
 
-      const anchor = img.closest('a');
+      const anchor = img.closest("a");
       if (anchor) {
         const href = anchor.href;
         if (href && /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico|avif)(\?.*)?$/i.test(href)) {
@@ -152,11 +171,11 @@ export default defineContentScript({
     }
 
     function findHoverableImage(el: HTMLElement): HTMLImageElement | null {
-      if (el.tagName === 'IMG') {
+      if (el.tagName === "IMG") {
         return isImageLargeEnough(el as HTMLImageElement) ? (el as HTMLImageElement) : null;
       }
 
-      const innerImg = el.querySelector('img');
+      const innerImg = el.querySelector("img");
       if (innerImg && isImageLargeEnough(innerImg)) {
         return innerImg;
       }
@@ -164,11 +183,18 @@ export default defineContentScript({
       let parent = el.parentElement;
       let depth = 0;
       // 限制向上遍历的深度和范围，防止通过 shadow host 遍历到 body 然后 querySelector 找到无关图片
-      while (parent && depth < 3 && parent !== document.body && parent !== document.documentElement) {
-        if (parent.tagName === 'IMG') {
-          return isImageLargeEnough(parent as HTMLImageElement) ? (parent as HTMLImageElement) : null;
+      while (
+        parent &&
+        depth < 3 &&
+        parent !== document.body &&
+        parent !== document.documentElement
+      ) {
+        if (parent.tagName === "IMG") {
+          return isImageLargeEnough(parent as HTMLImageElement)
+            ? (parent as HTMLImageElement)
+            : null;
         }
-        const parentImg = parent.querySelector('img');
+        const parentImg = parent.querySelector("img");
         if (parentImg && isImageLargeEnough(parentImg)) {
           return parentImg;
         }
@@ -198,16 +224,16 @@ export default defineContentScript({
       const actions: ToolbarAction[] = [];
       if (interceptEnabled) {
         actions.push({
-          id: 'preview',
+          id: "preview",
           icon: ICON_PREVIEW,
-          title: t('toolbar_preview'),
+          title: t("toolbar_preview"),
         });
       }
       if (beautifyEnabled) {
         actions.push({
-          id: 'beautify',
+          id: "beautify",
           icon: ICON_BEAUTIFY,
-          title: t('toolbar_beautify'),
+          title: t("toolbar_beautify"),
         });
       }
       return actions;
@@ -233,11 +259,11 @@ export default defineContentScript({
       const toolbarY = rect.top; // 紧贴图片上边缘
 
       const newUi = await createShadowRootUi(ctx, {
-        name: 'image-hover-toolbar',
-        position: 'overlay',
+        name: "image-hover-toolbar",
+        position: "overlay",
         zIndex: 2147483646,
         onMount(container) {
-          const appRoot = document.createElement('div');
+          const appRoot = document.createElement("div");
           container.append(appRoot);
 
           const app = createApp(ImageHoverToolbar, {
@@ -246,11 +272,11 @@ export default defineContentScript({
             x: toolbarX,
             y: toolbarY,
             onAction: (actionId: string) => {
-              if (actionId === 'preview' && currentHoverImageUrl) {
+              if (actionId === "preview" && currentHoverImageUrl) {
                 const urlToPreview = currentHoverImageUrl;
                 hideToolbar();
                 setTimeout(() => showPreview(urlToPreview), 50);
-              } else if (actionId === 'beautify' && currentHoverImageUrl) {
+              } else if (actionId === "beautify" && currentHoverImageUrl) {
                 const urlToBeautify = currentHoverImageUrl;
                 hideToolbar();
                 openBeautifyPage(urlToBeautify);
@@ -300,8 +326,41 @@ export default defineContentScript({
 
     // ========== 事件监听 ==========
 
+    /**
+     * 判断当前策略是否允许显示工具栏
+     */
+    function isToolbarAllowedByStrategy(): boolean {
+      const host = window.location.hostname;
+      
+      const strategy = toolbarStrategy || "open_with_blacklist";
+      const whitelist = Array.isArray(toolbarWhitelist) ? toolbarWhitelist : [];
+      const blacklist = Array.isArray(toolbarBlacklist) ? toolbarBlacklist : [];
+
+      if (strategy === "open_all") {
+        return true;
+      }
+
+      if (strategy === "close_all") {
+        return false;
+      }
+
+      if (strategy === "close_with_whitelist") {
+        return whitelist.includes(host);
+      }
+
+      if (strategy === "open_with_blacklist") {
+        return !blacklist.includes(host);
+      }
+
+      // 默认放行
+      return true;
+    }
+
     // mouseover：hover 到新图片时，替换工具栏（旧的自动销毁）
-    document.addEventListener('mouseover', (e: MouseEvent) => {
+    document.addEventListener("mouseover", (e: MouseEvent) => {
+      // 如果当前策略拦截，直接返回
+      if (!isToolbarAllowedByStrategy()) return;
+
       // 预览和美化都关闭时，不显示工具栏
       if (!interceptEnabled && !beautifyEnabled) return;
       if (uiMounted) return;
@@ -310,7 +369,10 @@ export default defineContentScript({
       if (!target) return;
 
       // 如果目标是工具栏本身或其内部元素，直接忽略
-      if (toolbarShadowHost && (toolbarShadowHost === target || toolbarShadowHost.contains(target))) {
+      if (
+        toolbarShadowHost &&
+        (toolbarShadowHost === target || toolbarShadowHost.contains(target))
+      ) {
         return;
       }
 
@@ -325,7 +387,7 @@ export default defineContentScript({
 
     // mousemove：鼠标远离图片超过 60px 时隐藏
     let lastMoveCheck = 0;
-    document.addEventListener('mousemove', (e: MouseEvent) => {
+    document.addEventListener("mousemove", (e: MouseEvent) => {
       if (!currentHoverTarget || !toolbarUi) return;
 
       const now = Date.now();
@@ -341,15 +403,19 @@ export default defineContentScript({
     });
 
     // scroll：页面滚动时隐藏（工具栏 fixed 定位会偏移）
-    window.addEventListener('scroll', () => {
-      if (toolbarUi) {
-        hideToolbar();
-      }
-    }, { passive: true });
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (toolbarUi) {
+          hideToolbar();
+        }
+      },
+      { passive: true },
+    );
 
     // ========== 消息监听：接收 popup 发来的本地图片 ==========
     browser.runtime.onMessage.addListener((message: any) => {
-      if (message?.type === 'snaplab:open-local-image' && message.dataUrl) {
+      if (message?.type === "snaplab:open-local-image" && message.dataUrl) {
         showPreview(message.dataUrl);
       }
     });

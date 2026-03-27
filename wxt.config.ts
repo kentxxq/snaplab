@@ -1,20 +1,20 @@
-import { defineConfig } from 'wxt';
+import { defineConfig } from "wxt";
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
-  outDir: 'dist',
+  outDir: "dist",
   manifest: {
-    name: '__MSG_extension_name__',
-    description: '__MSG_extension_description__',
-    default_locale: 'zh_CN',
-    permissions: ['storage', 'tabs'],
-    host_permissions: ['<all_urls>'],
+    name: "__MSG_extension_name__",
+    description: "__MSG_extension_description__",
+    default_locale: "zh_CN",
+    permissions: ["storage", "tabs", "contextMenus"],
+    host_permissions: ["<all_urls>"],
     action: {
-      default_title: '__MSG_extension_name__',
+      default_title: "__MSG_extension_name__",
     },
   },
-  modules: ['@wxt-dev/module-vue'],
+  modules: ["@wxt-dev/module-vue"],
   webExt: {
-    startUrls: ['https://image.baidu.com/'],
+    startUrls: ["https://image.baidu.com/"],
   },
 });

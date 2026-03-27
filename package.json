@@ -1,8 +1,8 @@
 {
   "name": "snaplab",
-  "description": "网页助手插件，包含图片预览、缩放、旋转等图片处理相关功能。",
+  "version": "0.0.9",
   "private": true,
-  "version": "0.0.8",
+  "description": "网页助手插件，包含图片预览、缩放、旋转等图片处理相关功能。",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -27,5 +27,6 @@
     "typescript": "^5.9.3",
     "vue-tsc": "^3.2.4",
     "wxt": "^0.20.18"
-  }
+  },
+  "packageManager": "pnpm@10.33.0"
 }

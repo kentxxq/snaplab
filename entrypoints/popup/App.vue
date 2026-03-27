@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
-import { initLanguage, t, getLanguage, setLanguage, type Language } from '@/utils/i18n';
+import { ref, onMounted, computed } from "vue";
+import { initLanguage, t, getLanguage, setLanguage, type Language } from "@/utils/i18n";
 
 // 语言状态 (language state)
-const currentLang = ref<Language>('zh_CN');
+const currentLang = ref<Language>("zh_CN");
 const ready = ref(false);
 
 // 拦截开关状态，默认开启 (intercept toggle, default on)
@@ -11,20 +11,89 @@ const interceptEnabled = ref(true);
 // 美化开关状态，默认开启 (beautify toggle, default on)
 const beautifyEnabled = ref(true);
 
+// 显示策略状态 (display strategy state)
+const toolbarStrategy = ref("open_with_blacklist");
+const toolbarWhitelist = ref<string[]>([]);
+const toolbarBlacklist = ref<string[]>([]);
+const currentHost = ref("");
+
 onMounted(async () => {
   // 初始化语言 (init language)
   currentLang.value = await initLanguage();
   ready.value = true;
 
   // 从 storage 读取开关状态 (read toggle state from storage)
-  const result = await browser.storage.local.get(['interceptEnabled', 'beautifyEnabled']);
-  if (typeof result.interceptEnabled === 'boolean') {
+  const result = await browser.storage.local.get([
+    "interceptEnabled",
+    "beautifyEnabled",
+    "toolbarStrategy",
+    "toolbarWhitelist",
+    "toolbarBlacklist",
+  ]);
+  if (typeof result.interceptEnabled === "boolean") {
     interceptEnabled.value = result.interceptEnabled;
   }
-  if (typeof result.beautifyEnabled === 'boolean') {
+  if (typeof result.beautifyEnabled === "boolean") {
     beautifyEnabled.value = result.beautifyEnabled;
   }
+  if (result.toolbarStrategy) {
+    toolbarStrategy.value = result.toolbarStrategy as string;
+  }
+  if (result.toolbarWhitelist) {
+    toolbarWhitelist.value = result.toolbarWhitelist as string[];
+  }
+  if (result.toolbarBlacklist) {
+    toolbarBlacklist.value = result.toolbarBlacklist as string[];
+  }
+
+  // 获取当前域 (get current domain)
+  const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+  if (tab?.url) {
+    try {
+      const url = new URL(tab.url);
+      if (url.protocol.startsWith("http")) {
+        currentHost.value = url.hostname;
+      }
+    } catch (e) {
+      // ignore invalid URLs
+    }
+  }
 });
+
+const isCurrentInWhitelist = computed(() => toolbarWhitelist.value.includes(currentHost.value));
+const isCurrentInBlacklist = computed(() => toolbarBlacklist.value.includes(currentHost.value));
+
+async function updateStrategy() {
+  await browser.storage.local.set({ toolbarStrategy: toolbarStrategy.value });
+}
+
+async function toggleWhitelist() {
+  if (!currentHost.value) return;
+  if (isCurrentInWhitelist.value) {
+    toolbarWhitelist.value = toolbarWhitelist.value.filter((h) => h !== currentHost.value);
+  } else {
+    toolbarWhitelist.value.push(currentHost.value);
+    toolbarBlacklist.value = toolbarBlacklist.value.filter((h) => h !== currentHost.value);
+  }
+  await browser.storage.local.set({
+    toolbarWhitelist: [...toolbarWhitelist.value],
+    toolbarBlacklist: [...toolbarBlacklist.value],
+  });
+}
+
+async function toggleBlacklist() {
+  if (!currentHost.value) return;
+  if (isCurrentInBlacklist.value) {
+    toolbarBlacklist.value = toolbarBlacklist.value.filter((h) => h !== currentHost.value);
+  } else {
+    toolbarBlacklist.value.push(currentHost.value);
+    toolbarWhitelist.value = toolbarWhitelist.value.filter((h) => h !== currentHost.value);
+  }
+  await browser.storage.local.set({
+    toolbarWhitelist: [...toolbarWhitelist.value],
+    toolbarBlacklist: [...toolbarBlacklist.value],
+  });
+}
 
 async function toggleIntercept() {
   interceptEnabled.value = !interceptEnabled.value;
@@ -38,16 +107,16 @@ async function toggleBeautify() {
 
 // 切换语言 (switch language)
 async function toggleLanguage() {
-  const newLang: Language = currentLang.value === 'zh_CN' ? 'en' : 'zh_CN';
+  const newLang: Language = currentLang.value === "zh_CN" ? "en" : "zh_CN";
   await setLanguage(newLang);
   currentLang.value = newLang;
 }
 
 // 打开本地图片 (open local image)
 function openLocalImage() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*,.heic,.heif';
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*,.heic,.heif";
   input.onchange = async () => {
     const file = input.files?.[0];
     if (!file) return;
@@ -58,7 +127,7 @@ function openLocalImage() {
         const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
         if (tab?.id) {
           await browser.tabs.sendMessage(tab.id, {
-            type: 'snaplab:open-local-image',
+            type: "snaplab:open-local-image",
             dataUrl,
           });
           window.close();
@@ -67,7 +136,7 @@ function openLocalImage() {
         // content script 不可用（如 newtab 页面），通过内部预览页面打开
         await browser.storage.local.set({ previewImageDataUrl: dataUrl });
         await browser.tabs.create({
-          url: browser.runtime.getURL('/preview.html'),
+          url: browser.runtime.getURL("/preview.html"),
         });
         window.close();
       }
@@ -81,11 +150,11 @@ function openLocalImage() {
 <template>
   <div class="container" v-if="ready">
     <img src="/icon/128.png" class="logo" alt="SnapLab logo" />
-    <h1 class="title">{{ t('extension_name') }}</h1>
-    <p class="desc">{{ t('extension_description') }}</p>
+    <h1 class="title">{{ t("extension_name") }}</h1>
+    <p class="desc">{{ t("extension_description") }}</p>
 
     <div class="toggle-section">
-      <span class="toggle-label">{{ t('popup_image_preview') }}</span>
+      <span class="toggle-label">{{ t("popup_image_preview") }}</span>
       <button
         class="toggle-btn"
         :class="{ active: interceptEnabled }"
@@ -97,7 +166,7 @@ function openLocalImage() {
     </div>
 
     <div class="toggle-section">
-      <span class="toggle-label">{{ t('popup_image_beautify') }}</span>
+      <span class="toggle-label">{{ t("popup_image_beautify") }}</span>
       <button
         class="toggle-btn"
         :class="{ active: beautifyEnabled }"
@@ -109,26 +178,59 @@ function openLocalImage() {
     </div>
 
     <p class="status-text">
-      {{ interceptEnabled ? t('popup_preview_on') : t('popup_preview_off') }}
+      {{ interceptEnabled ? t("popup_preview_on") : t("popup_preview_off") }}
     </p>
     <p class="status-text" v-if="interceptEnabled">
-      {{ beautifyEnabled ? t('popup_beautify_on') : t('popup_beautify_off') }}
+      {{ beautifyEnabled ? t("popup_beautify_on") : t("popup_beautify_off") }}
     </p>
 
     <div class="divider"></div>
 
+    <!-- 策略配置 (Strategy Config) -->
+    <div class="strategy-section">
+      <div class="strategy-header">{{ t("popup_strategy_title") }}</div>
+      <select v-model="toolbarStrategy" @change="updateStrategy" class="strategy-select">
+        <option value="open_all">{{ t("strategy_open_all") }}</option>
+        <option value="close_all">{{ t("strategy_close_all") }}</option>
+        <option value="close_with_whitelist">{{ t("strategy_close_with_whitelist") }}</option>
+        <option value="open_with_blacklist">{{ t("strategy_open_with_blacklist") }}</option>
+      </select>
+
+      <div class="site-actions" v-if="currentHost">
+        <div class="current-host">{{ currentHost }}</div>
+        <div class="action-buttons">
+          <button
+            class="site-btn"
+            :class="{ active: isCurrentInWhitelist }"
+            @click="toggleWhitelist"
+          >
+            {{ isCurrentInWhitelist ? t("site_remove_whitelist") : t("site_add_whitelist") }}
+          </button>
+          <button
+            class="site-btn"
+            :class="{ active: isCurrentInBlacklist }"
+            @click="toggleBlacklist"
+          >
+            {{ isCurrentInBlacklist ? t("site_remove_blacklist") : t("site_add_blacklist") }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
     <button class="open-local-btn" @click="openLocalImage">
-      {{ t('popup_open_local_image') }}
+      {{ t("popup_open_local_image") }}
     </button>
-    <p class="status-text">{{ t('popup_open_local_hint') }}</p>
+    <p class="status-text">{{ t("popup_open_local_hint") }}</p>
 
     <div class="divider"></div>
 
     <!-- 语言切换 (language switch) -->
     <div class="toggle-section">
-      <span class="toggle-label">{{ t('lang_label') }}</span>
+      <span class="toggle-label">{{ t("lang_label") }}</span>
       <button class="lang-btn" @click="toggleLanguage">
-        {{ currentLang === 'zh_CN' ? '中文 → EN' : 'EN → 中文' }}
+        {{ currentLang === "zh_CN" ? "中文 → EN" : "EN → 中文" }}
       </button>
     </div>
   </div>
@@ -252,12 +354,76 @@ function openLocalImage() {
   border-color: #ccc;
 }
 
+/* 策略区域 (Strategy Section) */
+.strategy-section {
+  text-align: left;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+.strategy-header {
+  font-size: 13px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+}
+.strategy-select {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  margin-bottom: 12px;
+  background: white;
+  color: #333;
+}
+.current-host {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 6px;
+  word-break: break-all;
+}
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+.site-btn {
+  flex: 1;
+  padding: 6px 0;
+  font-size: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.site-btn:hover {
+  background: #f0f0f0;
+}
+.site-btn.active {
+  background: #e3f2fd;
+  border-color: #2196f3;
+  color: #1976d2;
+}
+
 @media (prefers-color-scheme: dark) {
-  .title { color: #eee; }
-  .desc { color: #ccc; }
-  .toggle-label { color: #ddd; }
-  .toggle-btn { background-color: #555; }
-  .divider { background: #444; }
+  .title {
+    color: #eee;
+  }
+  .desc {
+    color: #ccc;
+  }
+  .toggle-label {
+    color: #ddd;
+  }
+  .toggle-btn {
+    background-color: #555;
+  }
+  .divider {
+    background: #444;
+  }
   .open-local-btn {
     background: #333;
     border-color: #555;
@@ -276,7 +442,39 @@ function openLocalImage() {
     background: #444;
     border-color: #666;
   }
-  .toggle-btn.active { background-color: #4caf50; }
-  .status-text { color: #888; }
+  .toggle-btn.active {
+    background-color: #4caf50;
+  }
+  .status-text {
+    color: #888;
+  }
+
+  .strategy-section {
+    background: #2a2a2a;
+  }
+  .strategy-header {
+    color: #eee;
+  }
+  .strategy-select {
+    background: #333;
+    color: #eee;
+    border-color: #555;
+  }
+  .current-host {
+    color: #aaa;
+  }
+  .site-btn {
+    background: #333;
+    color: #eee;
+    border-color: #555;
+  }
+  .site-btn:hover {
+    background: #444;
+  }
+  .site-btn.active {
+    background: #1a3b5c;
+    border-color: #2196f3;
+    color: #64b5f6;
+  }
 }
 </style>

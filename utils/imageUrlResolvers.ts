@@ -28,39 +28,38 @@ type ImageUrlResolver = (url: string) => string | null;
  * 注意：external-preview.redd.it 是外部图片代理，不做转换
  */
 function redditResolver(url: string): string | null {
-    try {
-        const u = new URL(url);
-        // 只处理 preview.redd.it，不处理 external-preview.redd.it
-        if (u.hostname !== 'preview.redd.it') return null;
+  try {
+    const u = new URL(url);
+    // 只处理 preview.redd.it，不处理 external-preview.redd.it
+    if (u.hostname !== "preview.redd.it") return null;
 
-        // 提取文件名（不含路径前缀 /）
-        const pathname = u.pathname; // e.g. "/some-title-v0-abc123.jpg"
-        const filename = pathname.split('/').pop();
-        if (!filename) return null;
+    // 提取文件名（不含路径前缀 /）
+    const pathname = u.pathname; // e.g. "/some-title-v0-abc123.jpg"
+    const filename = pathname.split("/").pop();
+    if (!filename) return null;
 
-        // 分离文件名和扩展名
-        const dotIndex = filename.lastIndexOf('.');
-        const ext = dotIndex > 0 ? filename.substring(dotIndex) : '';
-        const nameWithoutExt = dotIndex > 0 ? filename.substring(0, dotIndex) : filename;
+    // 分离文件名和扩展名
+    const dotIndex = filename.lastIndexOf(".");
+    const ext = dotIndex > 0 ? filename.substring(dotIndex) : "";
+    const nameWithoutExt = dotIndex > 0 ? filename.substring(0, dotIndex) : filename;
 
-        // 提取真正的图片 ID：如果包含 -v0-，取其后的部分；否则用整个文件名
-        const v0Index = nameWithoutExt.lastIndexOf('-v0-');
-        const imageId = v0Index >= 0
-            ? nameWithoutExt.substring(v0Index + 4) // "-v0-" 长度为 4
-            : nameWithoutExt;
+    // 提取真正的图片 ID：如果包含 -v0-，取其后的部分；否则用整个文件名
+    const v0Index = nameWithoutExt.lastIndexOf("-v0-");
+    const imageId =
+      v0Index >= 0
+        ? nameWithoutExt.substring(v0Index + 4) // "-v0-" 长度为 4
+        : nameWithoutExt;
 
-        return `https://i.redd.it/${imageId}${ext}`;
-    } catch {
-        // URL 解析失败，跳过
-    }
-    return null;
+    return `https://i.redd.it/${imageId}${ext}`;
+  } catch {
+    // URL 解析失败，跳过
+  }
+  return null;
 }
 
 // ========== 注册所有解析器 ==========
 // 后续新增站点只需在此数组添加新的 resolver
-const resolvers: ImageUrlResolver[] = [
-    redditResolver,
-];
+const resolvers: ImageUrlResolver[] = [redditResolver];
 
 /**
  * 尝试将图片 URL 升级为最高清晰度版本。
@@ -68,9 +67,9 @@ const resolvers: ImageUrlResolver[] = [
  * 否则返回原始 URL。
  */
 export function upgradeImageUrl(url: string): string {
-    for (const resolver of resolvers) {
-        const upgraded = resolver(url);
-        if (upgraded) return upgraded;
-    }
-    return url;
+  for (const resolver of resolvers) {
+    const upgraded = resolver(url);
+    if (upgraded) return upgraded;
+  }
+  return url;
 }

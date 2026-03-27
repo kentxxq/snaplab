@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { initLanguage, t } from '@/utils/i18n';
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { initLanguage, t } from "@/utils/i18n";
 
 const props = defineProps<{
   src: string;
@@ -20,34 +20,54 @@ const bgBorderRadius = ref(16);
 
 // 背景预设 (background presets)
 const bgPresets = [
-  { nameKey: 'beautify_bg_indigo', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-  { nameKey: 'beautify_bg_cyan_pink', gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' },
-  { nameKey: 'beautify_bg_warm_orange', gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-  { nameKey: 'beautify_bg_deep_blue', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
-  { nameKey: 'beautify_bg_sunset', gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' },
-  { nameKey: 'beautify_bg_forest', gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
-  { nameKey: 'beautify_bg_profound', gradient: 'linear-gradient(135deg, #0c3483 0%, #a2b6df 100%, #6b8cce 100%)' },
-  { nameKey: 'beautify_bg_dark_night', gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' },
+  { nameKey: "beautify_bg_indigo", gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" },
+  {
+    nameKey: "beautify_bg_cyan_pink",
+    gradient: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
+  },
+  {
+    nameKey: "beautify_bg_warm_orange",
+    gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+  },
+  {
+    nameKey: "beautify_bg_deep_blue",
+    gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+  },
+  { nameKey: "beautify_bg_sunset", gradient: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)" },
+  { nameKey: "beautify_bg_forest", gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)" },
+  {
+    nameKey: "beautify_bg_profound",
+    gradient: "linear-gradient(135deg, #0c3483 0%, #a2b6df 100%, #6b8cce 100%)",
+  },
+  {
+    nameKey: "beautify_bg_dark_night",
+    gradient: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+  },
 ];
 
 const shadowPresets = [
-  'none',
-  '0 4px 16px rgba(0,0,0,0.15)',
-  '0 8px 32px rgba(0,0,0,0.25)',
-  '0 16px 64px rgba(0,0,0,0.4)',
+  "none",
+  "0 4px 16px rgba(0,0,0,0.15)",
+  "0 8px 32px rgba(0,0,0,0.25)",
+  "0 16px 64px rgba(0,0,0,0.4)",
 ];
 
-const shadowLabelKeys = ['beautify_shadow_none', 'beautify_shadow_small', 'beautify_shadow_medium', 'beautify_shadow_large'];
+const shadowLabelKeys = [
+  "beautify_shadow_none",
+  "beautify_shadow_small",
+  "beautify_shadow_medium",
+  "beautify_shadow_large",
+];
 
 const imageStyle = computed(() => ({
-  borderRadius: borderRadius.value + 'px',
+  borderRadius: borderRadius.value + "px",
   boxShadow: shadowPresets[shadowLevel.value],
 }));
 
 const previewContainerStyle = computed(() => ({
   background: bgPresets[selectedBg.value].gradient,
-  padding: padding.value + 'px',
-  borderRadius: bgBorderRadiusEnabled.value ? bgBorderRadius.value + 'px' : '0px',
+  padding: padding.value + "px",
+  borderRadius: bgBorderRadiusEnabled.value ? bgBorderRadius.value + "px" : "0px",
 }));
 
 const imageLoaded = ref(false);
@@ -65,17 +85,17 @@ function onImageLoad(e: Event) {
   imageLoaded.value = true;
 }
 
-const copyStatus = ref<'idle' | 'success' | 'error'>('idle');
-const downloadStatus = ref<'idle' | 'success' | 'error'>('idle');
+const copyStatus = ref<"idle" | "success" | "error">("idle");
+const downloadStatus = ref<"idle" | "success" | "error">("idle");
 let copyTimer: ReturnType<typeof setTimeout> | null = null;
 let downloadTimer: ReturnType<typeof setTimeout> | null = null;
 
 async function renderToCanvas(): Promise<HTMLCanvasElement> {
   const img = new Image();
-  img.crossOrigin = 'anonymous';
+  img.crossOrigin = "anonymous";
   await new Promise<void>((resolve, reject) => {
     img.onload = () => resolve();
-    img.onerror = () => reject(new Error(t('beautify_image_load_error')));
+    img.onerror = () => reject(new Error(t("beautify_image_load_error")));
     img.src = props.src;
   });
 
@@ -84,10 +104,10 @@ async function renderToCanvas(): Promise<HTMLCanvasElement> {
   const shadow = shadowLevel.value;
   const canvasW = img.naturalWidth + pad * 2;
   const canvasH = img.naturalHeight + pad * 2;
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = canvasW;
   canvas.height = canvasH;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext("2d")!;
 
   // 背景圆角裁剪 (clip background with border-radius)
   const bgRadius = bgBorderRadiusEnabled.value ? bgBorderRadius.value : 0;
@@ -99,9 +119,14 @@ async function renderToCanvas(): Promise<HTMLCanvasElement> {
 
   // 绘制背景渐变
   const gradientColors: [string, string][] = [
-    ['#667eea', '#764ba2'], ['#a8edea', '#fed6e3'], ['#f093fb', '#f5576c'],
-    ['#4facfe', '#00f2fe'], ['#fa709a', '#fee140'], ['#43e97b', '#38f9d7'],
-    ['#0c3483', '#6b8cce'], ['#1a1a2e', '#0f3460'],
+    ["#667eea", "#764ba2"],
+    ["#a8edea", "#fed6e3"],
+    ["#f093fb", "#f5576c"],
+    ["#4facfe", "#00f2fe"],
+    ["#fa709a", "#fee140"],
+    ["#43e97b", "#38f9d7"],
+    ["#0c3483", "#6b8cce"],
+    ["#1a1a2e", "#0f3460"],
   ];
   const colors = gradientColors[selectedBg.value] || gradientColors[0];
   const grad = ctx.createLinearGradient(0, 0, canvasW, canvasH);
@@ -111,10 +136,11 @@ async function renderToCanvas(): Promise<HTMLCanvasElement> {
   ctx.fillRect(0, 0, canvasW, canvasH);
 
   if (shadow > 0) {
-    const shadowConfigs = [null,
-      { blur: 16, offsetY: 4, color: 'rgba(0,0,0,0.15)' },
-      { blur: 32, offsetY: 8, color: 'rgba(0,0,0,0.25)' },
-      { blur: 64, offsetY: 16, color: 'rgba(0,0,0,0.4)' },
+    const shadowConfigs = [
+      null,
+      { blur: 16, offsetY: 4, color: "rgba(0,0,0,0.15)" },
+      { blur: 32, offsetY: 8, color: "rgba(0,0,0,0.25)" },
+      { blur: 64, offsetY: 16, color: "rgba(0,0,0,0.4)" },
     ];
     const sc = shadowConfigs[shadow]!;
     ctx.shadowColor = sc.color;
@@ -132,7 +158,7 @@ async function renderToCanvas(): Promise<HTMLCanvasElement> {
   ctx.closePath();
   ctx.clip();
   ctx.drawImage(img, pad, pad);
-  ctx.shadowColor = 'transparent';
+  ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
   return canvas;
 }
@@ -144,18 +170,20 @@ async function downloadPng() {
     canvas.toBlob((blob) => {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `snaplab-beautified-${Date.now()}.png`;
       a.click();
       URL.revokeObjectURL(url);
-    }, 'image/png');
-    downloadStatus.value = 'success';
+    }, "image/png");
+    downloadStatus.value = "success";
   } catch (e) {
-    console.error('[SnapLab] Export failed:', e);
-    downloadStatus.value = 'error';
+    console.error("[SnapLab] Export failed:", e);
+    downloadStatus.value = "error";
   }
-  downloadTimer = setTimeout(() => { downloadStatus.value = 'idle'; }, 2000);
+  downloadTimer = setTimeout(() => {
+    downloadStatus.value = "idle";
+  }, 2000);
 }
 
 async function copyToClipboard() {
@@ -163,27 +191,31 @@ async function copyToClipboard() {
   try {
     const canvas = await renderToCanvas();
     const blob = await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((b) => { b ? resolve(b) : reject(new Error('toBlob failed')); }, 'image/png');
+      canvas.toBlob((b) => {
+        b ? resolve(b) : reject(new Error("toBlob failed"));
+      }, "image/png");
     });
-    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-    copyStatus.value = 'success';
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    copyStatus.value = "success";
   } catch (e) {
-    console.error('[SnapLab] Copy failed:', e);
-    copyStatus.value = 'error';
+    console.error("[SnapLab] Copy failed:", e);
+    copyStatus.value = "error";
   }
-  copyTimer = setTimeout(() => { copyStatus.value = 'idle'; }, 2000);
+  copyTimer = setTimeout(() => {
+    copyStatus.value = "idle";
+  }, 2000);
 }
 
 function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape') emit('close');
+  if (e.key === "Escape") emit("close");
 }
 
 onMounted(async () => {
   await initLanguage();
-  document.addEventListener('keydown', handleKeydown);
+  document.addEventListener("keydown", handleKeydown);
 });
 onBeforeUnmount(() => {
-  document.removeEventListener('keydown', handleKeydown);
+  document.removeEventListener("keydown", handleKeydown);
   if (copyTimer) clearTimeout(copyTimer);
   if (downloadTimer) clearTimeout(downloadTimer);
 });
@@ -191,7 +223,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="beautify-editor">
-
     <!-- 左侧：预览区 -->
     <div class="preview-area">
       <div class="preview-canvas" :style="previewContainerStyle">
@@ -204,9 +235,7 @@ onBeforeUnmount(() => {
         />
       </div>
       <!-- 尺寸提示（显示导出尺寸） -->
-      <div v-if="imageLoaded" class="size-badge">
-        {{ exportWidth }} × {{ exportHeight }}
-      </div>
+      <div v-if="imageLoaded" class="size-badge">{{ exportWidth }} × {{ exportHeight }}</div>
     </div>
 
     <!-- 右侧：操作面板 -->
@@ -215,11 +244,39 @@ onBeforeUnmount(() => {
       <div class="panel-header">
         <div class="panel-title-row">
           <!-- 星形图标 -->
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="title-icon"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/></svg>
-          <h2 class="panel-title">{{ t('beautify_title') }}</h2>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="title-icon"
+          >
+            <path
+              d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"
+            />
+          </svg>
+          <h2 class="panel-title">{{ t("beautify_title") }}</h2>
         </div>
         <button class="close-btn" @click="emit('close')" :title="t('btn_close')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </button>
       </div>
 
@@ -228,10 +285,9 @@ onBeforeUnmount(() => {
 
       <!-- 控制项列表 -->
       <div class="control-list">
-
         <!-- 背景 -->
         <div class="control-item">
-          <label class="control-label">{{ t('beautify_background') }}</label>
+          <label class="control-label">{{ t("beautify_background") }}</label>
           <div class="bg-grid">
             <button
               v-for="(bg, index) in bgPresets"
@@ -248,7 +304,7 @@ onBeforeUnmount(() => {
         <!-- 背景圆角 -->
         <div class="control-item">
           <label class="control-label">
-            {{ t('beautify_bg_border_radius') }}
+            {{ t("beautify_bg_border_radius") }}
             <div class="control-label-actions">
               <span v-if="bgBorderRadiusEnabled" class="control-value">{{ bgBorderRadius }}px</span>
               <button
@@ -265,7 +321,10 @@ onBeforeUnmount(() => {
           </label>
           <input
             v-if="bgBorderRadiusEnabled"
-            type="range" min="0" max="48" step="1"
+            type="range"
+            min="0"
+            max="48"
+            step="1"
             v-model.number="bgBorderRadius"
             class="slider"
           />
@@ -274,16 +333,23 @@ onBeforeUnmount(() => {
         <!-- 圆角 -->
         <div class="control-item">
           <label class="control-label">
-            {{ t('beautify_border_radius') }}
+            {{ t("beautify_border_radius") }}
             <span class="control-value">{{ borderRadius }}px</span>
           </label>
-          <input type="range" min="0" max="32" step="1" v-model.number="borderRadius" class="slider" />
+          <input
+            type="range"
+            min="0"
+            max="32"
+            step="1"
+            v-model.number="borderRadius"
+            class="slider"
+          />
         </div>
 
         <!-- 内边距 -->
         <div class="control-item">
           <label class="control-label">
-            {{ t('beautify_padding') }}
+            {{ t("beautify_padding") }}
             <span class="control-value">{{ padding }}px</span>
           </label>
           <input type="range" min="16" max="96" step="4" v-model.number="padding" class="slider" />
@@ -291,7 +357,7 @@ onBeforeUnmount(() => {
 
         <!-- 阴影 -->
         <div class="control-item">
-          <label class="control-label">{{ t('beautify_shadow') }}</label>
+          <label class="control-label">{{ t("beautify_shadow") }}</label>
           <div class="shadow-options">
             <button
               v-for="(key, index) in shadowLabelKeys"
@@ -304,7 +370,6 @@ onBeforeUnmount(() => {
             </button>
           </div>
         </div>
-
       </div>
 
       <!-- 底部操作按钮 -->
@@ -315,29 +380,114 @@ onBeforeUnmount(() => {
           @click="copyToClipboard"
         >
           <!-- 图标 -->
-          <svg v-if="copyStatus === 'idle'" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          <svg v-else-if="copyStatus === 'success'" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <span v-if="copyStatus === 'idle'">{{ t('beautify_copy') }}</span>
-          <span v-else-if="copyStatus === 'success'">{{ t('beautify_copied') }}</span>
-          <span v-else>{{ t('beautify_failed') }}</span>
+          <svg
+            v-if="copyStatus === 'idle'"
+            xmlns="http://www.w3.org/2000/svg"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          <svg
+            v-else-if="copyStatus === 'success'"
+            xmlns="http://www.w3.org/2000/svg"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+          <span v-if="copyStatus === 'idle'">{{ t("beautify_copy") }}</span>
+          <span v-else-if="copyStatus === 'success'">{{ t("beautify_copied") }}</span>
+          <span v-else>{{ t("beautify_failed") }}</span>
         </button>
 
         <button
           class="action-btn action-download"
-          :class="{ 'is-success': downloadStatus === 'success', 'is-error': downloadStatus === 'error' }"
+          :class="{
+            'is-success': downloadStatus === 'success',
+            'is-error': downloadStatus === 'error',
+          }"
           @click="downloadPng"
         >
-          <svg v-if="downloadStatus === 'idle'" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <svg v-else-if="downloadStatus === 'success'" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <span v-if="downloadStatus === 'idle'">{{ t('beautify_download') }}</span>
-          <span v-else-if="downloadStatus === 'success'">{{ t('beautify_downloaded') }}</span>
-          <span v-else>{{ t('beautify_failed') }}</span>
+          <svg
+            v-if="downloadStatus === 'idle'"
+            xmlns="http://www.w3.org/2000/svg"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          <svg
+            v-else-if="downloadStatus === 'success'"
+            xmlns="http://www.w3.org/2000/svg"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+          <span v-if="downloadStatus === 'idle'">{{ t("beautify_download") }}</span>
+          <span v-else-if="downloadStatus === 'success'">{{ t("beautify_downloaded") }}</span>
+          <span v-else>{{ t("beautify_failed") }}</span>
         </button>
       </div>
     </aside>
-
   </div>
 </template>
 
@@ -362,14 +512,16 @@ onBeforeUnmount(() => {
   position: relative;
   background:
     radial-gradient(ellipse at 30% 30%, rgba(102, 126, 234, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse at 70% 70%, rgba(118, 75, 162, 0.06) 0%, transparent 60%),
-    #0d0d0f;
+    radial-gradient(ellipse at 70% 70%, rgba(118, 75, 162, 0.06) 0%, transparent 60%), #0d0d0f;
   /* 棋盘格纹理，便于观察透明区域 */
   background-image:
     radial-gradient(ellipse at 30% 30%, rgba(102, 126, 234, 0.08) 0%, transparent 60%),
     radial-gradient(ellipse at 70% 70%, rgba(118, 75, 162, 0.06) 0%, transparent 60%),
-    repeating-conic-gradient(rgba(255,255,255,0.03) 0% 25%, transparent 0% 50%);
-  background-size: 100% 100%, 100% 100%, 24px 24px;
+    repeating-conic-gradient(rgba(255, 255, 255, 0.03) 0% 25%, transparent 0% 50%);
+  background-size:
+    100% 100%,
+    100% 100%,
+    24px 24px;
   overflow: hidden;
 }
 
@@ -377,7 +529,10 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: padding 0.3s ease, background 0.3s ease, border-radius 0.3s ease;
+  transition:
+    padding 0.3s ease,
+    background 0.3s ease,
+    border-radius 0.3s ease;
   max-width: calc(100% - 64px);
   max-height: calc(100% - 64px);
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
@@ -388,7 +543,9 @@ onBeforeUnmount(() => {
   max-height: calc(100vh - 96px);
   object-fit: contain;
   display: block;
-  transition: border-radius 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    border-radius 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .size-badge {
@@ -485,9 +642,16 @@ onBeforeUnmount(() => {
   gap: 24px;
 }
 
-.control-list::-webkit-scrollbar { width: 4px; }
-.control-list::-webkit-scrollbar-track { background: transparent; }
-.control-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+.control-list::-webkit-scrollbar {
+  width: 4px;
+}
+.control-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.control-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
 
 .control-item {
   display: flex;
@@ -577,7 +741,9 @@ onBeforeUnmount(() => {
   outline: none;
 }
 
-.bg-swatch:hover { transform: scale(1.08); }
+.bg-swatch:hover {
+  transform: scale(1.08);
+}
 
 .bg-swatch.active {
   border-color: #fff;
@@ -608,7 +774,9 @@ onBeforeUnmount(() => {
   transition: transform 0.15s;
 }
 
-.slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
 
 .slider::-moz-range-thumb {
   width: 16px;
@@ -719,14 +887,27 @@ onBeforeUnmount(() => {
 }
 
 @keyframes pop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.03); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
 }
 </style>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import ImageInfoPanel from './ImageInfoPanel.vue';
-import { initLanguage, t } from '@/utils/i18n';
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import ImageInfoPanel from "./ImageInfoPanel.vue";
+import { initLanguage, t } from "@/utils/i18n";
 
 const props = defineProps<{
   src: string;
@@ -28,13 +28,15 @@ const displaySrc = computed(() => {
 const showInfo = ref(false);
 
 // 边界提示 toast (boundary toast)
-const toastMessage = ref('');
+const toastMessage = ref("");
 let toastTimer: ReturnType<typeof setTimeout> | null = null;
 
 function showToast(msg: string) {
   toastMessage.value = msg;
   if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { toastMessage.value = ''; }, 1500);
+  toastTimer = setTimeout(() => {
+    toastMessage.value = "";
+  }, 1500);
 }
 
 // 图片变换状态 (image transform state)
@@ -60,15 +62,27 @@ const imageTransform = computed(() => {
     `scale(${scale.value})`,
     `rotate(${rotation.value}deg)`,
   ];
-  return parts.join(' ');
+  return parts.join(" ");
 });
 
-function zoomIn() { scale.value = Math.min(scale.value * 1.2, 10); }
-function zoomOut() { scale.value = Math.max(scale.value / 1.2, 0.1); }
-function rotateLeft() { rotation.value -= 90; }
-function rotateRight() { rotation.value += 90; }
-function toggleFlipX() { flipX.value = !flipX.value; }
-function toggleFlipY() { flipY.value = !flipY.value; }
+function zoomIn() {
+  scale.value = Math.min(scale.value * 1.2, 10);
+}
+function zoomOut() {
+  scale.value = Math.max(scale.value / 1.2, 0.1);
+}
+function rotateLeft() {
+  rotation.value -= 90;
+}
+function rotateRight() {
+  rotation.value += 90;
+}
+function toggleFlipX() {
+  flipX.value = !flipX.value;
+}
+function toggleFlipY() {
+  flipY.value = !flipY.value;
+}
 
 function resetTransform() {
   scale.value = 1;
@@ -99,12 +113,14 @@ function handleMouseMove(e: MouseEvent) {
   translateY.value = dragStartTranslateY.value + (e.clientY - dragStartY.value);
 }
 
-function handleMouseUp() { isDragging.value = false; }
+function handleMouseUp() {
+  isDragging.value = false;
+}
 
 function navigatePrev() {
   if (!props.images || props.images.length <= 1) return;
   if (internalIndex.value <= 0) {
-    showToast(t('preview_first_image'));
+    showToast(t("preview_first_image"));
     return;
   }
   resetTransform();
@@ -115,7 +131,7 @@ function navigatePrev() {
 function navigateNext() {
   if (!props.images || props.images.length <= 1) return;
   if (internalIndex.value >= props.images.length - 1) {
-    showToast(t('preview_last_image'));
+    showToast(t("preview_last_image"));
     return;
   }
   resetTransform();
@@ -124,26 +140,37 @@ function navigateNext() {
 }
 
 function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape') { emit('close'); return; }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); navigatePrev(); return; }
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); navigateNext(); return; }
+  if (e.key === "Escape") {
+    emit("close");
+    return;
+  }
+  if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+    e.preventDefault();
+    navigatePrev();
+    return;
+  }
+  if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+    e.preventDefault();
+    navigateNext();
+    return;
+  }
 }
 
 function handleOverlayClick(e: MouseEvent) {
-  if (e.target === e.currentTarget) emit('close');
+  if (e.target === e.currentTarget) emit("close");
 }
 
 onMounted(async () => {
   await initLanguage();
-  document.addEventListener('keydown', handleKeydown);
-  document.addEventListener('mousemove', handleMouseMove);
-  document.addEventListener('mouseup', handleMouseUp);
+  document.addEventListener("keydown", handleKeydown);
+  document.addEventListener("mousemove", handleMouseMove);
+  document.addEventListener("mouseup", handleMouseUp);
 });
 
 onBeforeUnmount(() => {
-  document.removeEventListener('keydown', handleKeydown);
-  document.removeEventListener('mousemove', handleMouseMove);
-  document.removeEventListener('mouseup', handleMouseUp);
+  document.removeEventListener("keydown", handleKeydown);
+  document.removeEventListener("mousemove", handleMouseMove);
+  document.removeEventListener("mouseup", handleMouseUp);
 });
 </script>
 
@@ -152,51 +179,196 @@ onBeforeUnmount(() => {
     <button class="close-btn" @click="emit('close')" :title="t('btn_close')">✕</button>
 
     <div class="image-container">
-      <img :src="displaySrc" :style="{ transform: imageTransform, cursor: isDragging ? 'grabbing' : 'grab' }" class="preview-image" @mousedown="handleMouseDown" draggable="false" />
+      <img
+        :src="displaySrc"
+        :style="{ transform: imageTransform, cursor: isDragging ? 'grabbing' : 'grab' }"
+        class="preview-image"
+        @mousedown="handleMouseDown"
+        draggable="false"
+      />
     </div>
 
     <div class="toolbar" @click.stop>
       <button class="tool-btn" @click="zoomIn" :title="t('btn_zoom_in')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          <line x1="11" y1="8" x2="11" y2="14" />
+          <line x1="8" y1="11" x2="14" y2="11" />
+        </svg>
       </button>
       <button class="tool-btn" @click="zoomOut" :title="t('btn_zoom_out')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          <line x1="8" y1="11" x2="14" y2="11" />
+        </svg>
       </button>
 
       <span class="toolbar-divider"></span>
 
       <button class="tool-btn" @click="rotateLeft" :title="t('btn_rotate_left')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="1 4 1 10 7 10" />
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+        </svg>
       </button>
       <button class="tool-btn" @click="rotateRight" :title="t('btn_rotate_right')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="23 4 23 10 17 10" />
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+        </svg>
       </button>
 
       <span class="toolbar-divider"></span>
 
-      <button class="tool-btn" :class="{ active: flipX }" @click="toggleFlipX" :title="t('btn_flip_x')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 3 3 12 7 21"/><polyline points="17 3 21 12 17 21"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+      <button
+        class="tool-btn"
+        :class="{ active: flipX }"
+        @click="toggleFlipX"
+        :title="t('btn_flip_x')"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="7 3 3 12 7 21" />
+          <polyline points="17 3 21 12 17 21" />
+          <line x1="12" y1="3" x2="12" y2="21" />
+        </svg>
       </button>
-      <button class="tool-btn" :class="{ active: flipY }" @click="toggleFlipY" :title="t('btn_flip_y')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 7 12 3 21 7"/><polyline points="3 17 12 21 21 17"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+      <button
+        class="tool-btn"
+        :class="{ active: flipY }"
+        @click="toggleFlipY"
+        :title="t('btn_flip_y')"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="3 7 12 3 21 7" />
+          <polyline points="3 17 12 21 21 17" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+        </svg>
       </button>
 
       <span class="toolbar-divider"></span>
 
       <button class="tool-btn" @click="resetTransform" :title="t('btn_reset')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+          <path d="M3 3v5h5" />
+        </svg>
       </button>
 
       <span class="toolbar-divider"></span>
 
-      <button class="tool-btn" :class="{ active: showInfo }" @click="showInfo = !showInfo" :title="t('btn_info')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <button
+        class="tool-btn"
+        :class="{ active: showInfo }"
+        @click="showInfo = !showInfo"
+        :title="t('btn_info')"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
       </button>
 
       <template v-if="props.beautifyEnabled">
         <span class="toolbar-divider"></span>
         <button class="tool-btn" @click="emit('beautify')" :title="t('btn_beautify')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"
+            />
+          </svg>
         </button>
       </template>
     </div>
@@ -206,10 +378,34 @@ onBeforeUnmount(() => {
     <!-- 左右导航箭头按钮 (prev/next navigation arrows) -->
     <template v-if="props.images && props.images.length > 1">
       <button class="nav-btn nav-prev" @click.stop="navigatePrev" :title="'←'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
       </button>
       <button class="nav-btn nav-next" @click.stop="navigateNext" :title="'→'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
       </button>
       <!-- 图片计数器 (image counter) -->
       <div class="image-counter">{{ internalIndex + 1 }} / {{ props.images.length }}</div>
@@ -225,81 +421,167 @@ onBeforeUnmount(() => {
 <style scoped>
 .image-preview-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.85);
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 2147483647;
   user-select: none;
 }
 .close-btn {
-  position: absolute; top: 16px; right: 16px;
-  width: 40px; height: 40px; border-radius: 50%; border: none;
-  background: rgba(255, 255, 255, 0.15); color: #fff; font-size: 18px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: background 0.2s; backdrop-filter: blur(8px);
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  backdrop-filter: blur(8px);
 }
-.close-btn:hover { background: rgba(255, 255, 255, 0.3); }
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
 .image-container {
-  display: flex; align-items: center; justify-content: center;
-  overflow: visible; max-width: 90vw; max-height: 85vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  max-width: 90vw;
+  max-height: 85vh;
 }
 .preview-image {
-  max-width: 90vw; max-height: 80vh; object-fit: contain;
-  transition: transform 0.15s ease; border-radius: 4px;
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+  transition: transform 0.15s ease;
+  border-radius: 4px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 .toolbar {
-  position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
-  display: flex; align-items: center; gap: 4px; padding: 8px 12px;
-  border-radius: 12px; background: rgba(30, 30, 30, 0.8);
-  backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1);
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(30, 30, 30, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 .tool-btn {
-  width: 36px; height: 36px; border: none; border-radius: 8px;
-  background: transparent; color: rgba(255, 255, 255, 0.8);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.15s;
 }
-.tool-btn:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
-.tool-btn.active { background: rgba(99, 102, 241, 0.5); color: #fff; }
+.tool-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+.tool-btn.active {
+  background: rgba(99, 102, 241, 0.5);
+  color: #fff;
+}
 .toolbar-divider {
-  width: 1px; height: 20px; background: rgba(255, 255, 255, 0.2); margin: 0 4px;
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 4px;
 }
 
 /* 导航按钮 (navigation buttons) */
 .nav-btn {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  width: 44px; height: 44px; border-radius: 50%; border: none;
-  background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.7);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s; backdrop-filter: blur(8px);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  backdrop-filter: blur(8px);
 }
-.nav-btn:hover { background: rgba(255, 255, 255, 0.25); color: #fff; }
-.nav-prev { left: 16px; }
-.nav-next { right: 16px; }
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+.nav-prev {
+  left: 16px;
+}
+.nav-next {
+  right: 16px;
+}
 
 /* 图片计数器 (image counter) */
 .image-counter {
-  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
-  padding: 4px 14px; border-radius: 16px;
-  background: rgba(30, 30, 30, 0.7); backdrop-filter: blur(8px);
-  color: rgba(255, 255, 255, 0.8); font-size: 13px;
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 14px;
+  border-radius: 16px;
+  background: rgba(30, 30, 30, 0.7);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  pointer-events: none; user-select: none;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* 边界提示 toast (boundary toast) */
 .preview-toast {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  padding: 10px 24px; border-radius: 8px;
-  background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(12px);
-  color: #fff; font-size: 14px; pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 10px 24px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  font-size: 14px;
+  pointer-events: none;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
-.toast-enter-active { transition: opacity 0.2s ease; }
-.toast-leave-active { transition: opacity 0.4s ease; }
-.toast-enter-from, .toast-leave-to { opacity: 0; }
+.toast-enter-active {
+  transition: opacity 0.2s ease;
+}
+.toast-leave-active {
+  transition: opacity 0.4s ease;
+}
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+}
 </style>
