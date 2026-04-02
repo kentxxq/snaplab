@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, nextTick } from "vue";
 import { initLanguage, t, getLanguage, setLanguage, type Language } from "@/utils/i18n";
 
 // 语言状态 (language state)
@@ -66,37 +66,79 @@ onMounted(async () => {
 const isCurrentInWhitelist = computed(() => toolbarWhitelist.value.includes(currentHost.value));
 const isCurrentInBlacklist = computed(() => toolbarBlacklist.value.includes(currentHost.value));
 
+// 判断当前站点在当前策略下是否会显示工具栏 (check if toolbar will be shown for current site)
+const isCurrentSiteActive = computed(() => {
+  if (!currentHost.value) return false;
+  const strategy = toolbarStrategy.value || "open_with_blacklist";
+  if (strategy === "open_all") return true;
+  if (strategy === "close_all") return false;
+  if (strategy === "close_with_whitelist") return isCurrentInWhitelist.value;
+  if (strategy === "open_with_blacklist") return !isCurrentInBlacklist.value;
+  return true;
+});
+
 async function updateStrategy() {
   await browser.storage.local.set({ toolbarStrategy: toolbarStrategy.value });
 }
 
-async function toggleWhitelist() {
-  if (!currentHost.value) return;
-  if (isCurrentInWhitelist.value) {
-    toolbarWhitelist.value = toolbarWhitelist.value.filter((h) => h !== currentHost.value);
-  } else {
-    toolbarWhitelist.value.push(currentHost.value);
-    toolbarBlacklist.value = toolbarBlacklist.value.filter((h) => h !== currentHost.value);
+// 手动添加域名到名单 (add domain to list manually)
+const whitelistInput = ref("");
+const blacklistInput = ref("");
+
+// 简单域名校验 (simple domain validation)
+function isValidDomain(domain: string): boolean {
+  return /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/.test(domain);
+}
+
+async function addToWhitelist() {
+  const domain = whitelistInput.value.trim().toLowerCase();
+  if (!domain || !isValidDomain(domain)) return;
+  if (toolbarWhitelist.value.includes(domain)) {
+    whitelistInput.value = "";
+    return;
   }
+  toolbarWhitelist.value.push(domain);
+  // 互斥：从黑名单中移除 (exclusive: remove from blacklist)
+  toolbarBlacklist.value = toolbarBlacklist.value.filter((h) => h !== domain);
   await browser.storage.local.set({
     toolbarWhitelist: [...toolbarWhitelist.value],
+    toolbarBlacklist: [...toolbarBlacklist.value],
+  });
+  whitelistInput.value = "";
+}
+
+async function addToBlacklist() {
+  const domain = blacklistInput.value.trim().toLowerCase();
+  if (!domain || !isValidDomain(domain)) return;
+  if (toolbarBlacklist.value.includes(domain)) {
+    blacklistInput.value = "";
+    return;
+  }
+  toolbarBlacklist.value.push(domain);
+  // 互斥：从白名单中移除 (exclusive: remove from whitelist)
+  toolbarWhitelist.value = toolbarWhitelist.value.filter((h) => h !== domain);
+  await browser.storage.local.set({
+    toolbarWhitelist: [...toolbarWhitelist.value],
+    toolbarBlacklist: [...toolbarBlacklist.value],
+  });
+  blacklistInput.value = "";
+}
+
+async function removeFromWhitelist(host: string) {
+  toolbarWhitelist.value = toolbarWhitelist.value.filter((h) => h !== host);
+  await browser.storage.local.set({
+    toolbarWhitelist: [...toolbarWhitelist.value],
+  });
+}
+
+async function removeFromBlacklist(host: string) {
+  toolbarBlacklist.value = toolbarBlacklist.value.filter((h) => h !== host);
+  await browser.storage.local.set({
     toolbarBlacklist: [...toolbarBlacklist.value],
   });
 }
 
-async function toggleBlacklist() {
-  if (!currentHost.value) return;
-  if (isCurrentInBlacklist.value) {
-    toolbarBlacklist.value = toolbarBlacklist.value.filter((h) => h !== currentHost.value);
-  } else {
-    toolbarBlacklist.value.push(currentHost.value);
-    toolbarWhitelist.value = toolbarWhitelist.value.filter((h) => h !== currentHost.value);
-  }
-  await browser.storage.local.set({
-    toolbarWhitelist: [...toolbarWhitelist.value],
-    toolbarBlacklist: [...toolbarBlacklist.value],
-  });
-}
+
 
 async function toggleIntercept() {
   interceptEnabled.value = !interceptEnabled.value;
@@ -224,25 +266,62 @@ function openLocalImage() {
           <option value="open_with_blacklist">{{ t("strategy_open_with_blacklist") }}</option>
         </select>
 
-        <div class="site-actions" v-if="currentHost">
-          <div class="current-host">{{ currentHost }}</div>
-          <div class="action-buttons">
-            <button
-              class="site-btn"
-              :class="{ active: isCurrentInWhitelist }"
-              @click="toggleWhitelist"
-            >
-              {{ isCurrentInWhitelist ? t("site_remove_whitelist") : t("site_add_whitelist") }}
-            </button>
-            <button
-              class="site-btn"
-              :class="{ active: isCurrentInBlacklist }"
-              @click="toggleBlacklist"
-            >
-              {{ isCurrentInBlacklist ? t("site_remove_blacklist") : t("site_add_blacklist") }}
-            </button>
+        <div class="site-status" v-if="currentHost">
+          <div class="site-status-row">
+            <span class="current-host">{{ currentHost }}</span>
+            <span class="status-badge" :class="isCurrentSiteActive ? 'active' : 'inactive'">
+              {{ isCurrentSiteActive ? t("site_status_active") : t("site_status_inactive") }}
+            </span>
           </div>
         </div>
+      </div>
+
+      <!-- 白名单列表 (Whitelist List) -->
+      <div class="list-section">
+        <div class="list-header">
+          <span class="list-title">{{ t("site_list_whitelist_title") }}</span>
+          <span class="list-count">{{ toolbarWhitelist.length }}</span>
+        </div>
+        <div class="list-add-row">
+          <input
+            v-model="whitelistInput"
+            class="list-add-input"
+            :placeholder="t('site_list_add_placeholder')"
+            @keyup.enter="addToWhitelist"
+          />
+          <button class="list-add-btn" @click="addToWhitelist">{{ t("site_list_add_btn") }}</button>
+        </div>
+        <div class="list-body" v-if="toolbarWhitelist.length">
+          <div class="list-item" v-for="host in toolbarWhitelist" :key="host">
+            <span class="list-item-host" :class="{ highlight: host === currentHost }">{{ host }}</span>
+            <button class="list-item-remove" @click="removeFromWhitelist(host)" title="Remove">&times;</button>
+          </div>
+        </div>
+        <div class="list-empty" v-else>{{ t("site_list_empty_whitelist") }}</div>
+      </div>
+
+      <!-- 黑名单列表 (Blacklist List) -->
+      <div class="list-section">
+        <div class="list-header">
+          <span class="list-title">{{ t("site_list_blacklist_title") }}</span>
+          <span class="list-count">{{ toolbarBlacklist.length }}</span>
+        </div>
+        <div class="list-add-row">
+          <input
+            v-model="blacklistInput"
+            class="list-add-input"
+            :placeholder="t('site_list_add_placeholder')"
+            @keyup.enter="addToBlacklist"
+          />
+          <button class="list-add-btn" @click="addToBlacklist">{{ t("site_list_add_btn") }}</button>
+        </div>
+        <div class="list-body" v-if="toolbarBlacklist.length">
+          <div class="list-item" v-for="host in toolbarBlacklist" :key="host">
+            <span class="list-item-host" :class="{ highlight: host === currentHost }">{{ host }}</span>
+            <button class="list-item-remove" @click="removeFromBlacklist(host)" title="Remove">&times;</button>
+          </div>
+        </div>
+        <div class="list-empty" v-else>{{ t("site_list_empty_blacklist") }}</div>
       </div>
 
       <div class="divider"></div>
@@ -453,31 +532,159 @@ function openLocalImage() {
 .current-host {
   font-size: 12px;
   color: #666;
-  margin-bottom: 6px;
   word-break: break-all;
+  flex: 1;
+  min-width: 0;
 }
-.action-buttons {
+.site-status {
+  margin-top: 8px;
+}
+.site-status-row {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
 }
-.site-btn {
+.status-badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: 10px;
+  letter-spacing: 0.3px;
+}
+.status-badge.active {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.status-badge.inactive {
+  background: #ffebee;
+  color: #c62828;
+}
+
+
+/* 名单列表区域 (List Section) */
+.list-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.list-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+.list-count {
+  font-size: 11px;
+  background: #e0e0e0;
+  color: #555;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+.list-add-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.list-add-input {
   flex: 1;
-  padding: 6px 0;
-  font-size: 12px;
+  padding: 5px 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 12px;
   background: white;
   color: #333;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.list-add-input:focus {
+  border-color: #2196f3;
+}
+.list-add-input::placeholder {
+  color: #aaa;
+}
+.list-add-btn {
+  padding: 5px 12px;
+  border: 1px solid #2196f3;
+  border-radius: 4px;
+  background: #2196f3;
+  color: white;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
 }
-.site-btn:hover {
-  background: #f0f0f0;
+.list-add-btn:hover {
+  background: #1976d2;
+  border-color: #1976d2;
 }
-.site-btn.active {
-  background: #e3f2fd;
-  border-color: #2196f3;
+.list-body {
+  max-height: 120px;
+  overflow-y: auto;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  background: white;
+}
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  font-size: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.15s;
+}
+.list-item:last-child {
+  border-bottom: none;
+}
+.list-item:hover {
+  background: #f5f5f5;
+}
+.list-item-host {
+  color: #555;
+  word-break: break-all;
+  flex: 1;
+  min-width: 0;
+}
+.list-item-host.highlight {
   color: #1976d2;
+  font-weight: 500;
+}
+.list-item-remove {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: none;
+  color: #bbb;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin-left: 4px;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.list-item-remove:hover {
+  background: #ffebee;
+  color: #e53935;
+}
+.list-empty {
+  font-size: 12px;
+  color: #aaa;
+  text-align: center;
+  padding: 10px 0;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -550,18 +757,60 @@ function openLocalImage() {
   .current-host {
     color: #aaa;
   }
-  .site-btn {
+  .status-badge.active {
+    background: #1b5e20;
+    color: #a5d6a7;
+  }
+  .status-badge.inactive {
+    background: #4a2020;
+    color: #ef9a9a;
+  }
+  .list-section {
+    background: #2a2a2a;
+  }
+  .list-title {
+    color: #eee;
+  }
+  .list-count {
+    background: #444;
+    color: #bbb;
+  }
+  .list-add-input {
     background: #333;
     color: #eee;
     border-color: #555;
   }
-  .site-btn:hover {
-    background: #444;
-  }
-  .site-btn.active {
-    background: #1a3b5c;
+  .list-add-input:focus {
     border-color: #2196f3;
+  }
+  .list-add-input::placeholder {
+    color: #777;
+  }
+  .list-body {
+    background: #333;
+    border-color: #444;
+  }
+  .list-item {
+    border-bottom-color: #444;
+  }
+  .list-item:hover {
+    background: #3a3a3a;
+  }
+  .list-item-host {
+    color: #ccc;
+  }
+  .list-item-host.highlight {
     color: #64b5f6;
+  }
+  .list-item-remove {
+    color: #777;
+  }
+  .list-item-remove:hover {
+    background: #4a2020;
+    color: #ef5350;
+  }
+  .list-empty {
+    color: #666;
   }
 }
 </style>
