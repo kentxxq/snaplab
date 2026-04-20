@@ -67,6 +67,7 @@ public/
   - [ ] https://socialscreenshots.com/editor
 - [ ] **功能深挖**：专注于图片功能，将其做到最强：
   - [ ] 格式转换
+  - [ ] snaplab 给图片加上位置，时间等信息。视频需要 ffmpeg，耗时长，不好用
   - [ ] 自动 emoji 头像：https://github.com/Steve-Mr/EmojiFace
   - [ ] 图片锐化？清晰度提升？
   - [ ] 加强图片美化的功能。允许将多张图片一起放到预览中，随时添加和删除和排列多个图片，支持横向和竖向排列，支持换行。
