@@ -5,6 +5,7 @@ import ImageHoverToolbar from "@/components/ImageHoverToolbar.vue";
 import type { ToolbarAction } from "@/components/ImageHoverToolbar.vue";
 import { initLanguage, t } from "@/utils/i18n";
 import { upgradeImageUrl } from "@/utils/imageUrlResolvers";
+import { getSyncSettings } from "@/utils/storage";
 import "~/assets/main.css";
 
 // 放大镜 SVG 图标
@@ -30,7 +31,7 @@ export default defineContentScript({
     let toolbarWhitelist: string[] = [];
     let toolbarBlacklist: string[] = [];
 
-    const result = await browser.storage.local.get([
+    const result = await getSyncSettings([
       "interceptEnabled",
       "beautifyEnabled",
       "toolbarStrategy",

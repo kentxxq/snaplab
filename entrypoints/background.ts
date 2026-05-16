@@ -1,11 +1,20 @@
 import { t, initLanguage } from "@/utils/i18n";
+import { getSyncSettings, setSyncSettings, initSyncListener, migrateLocalToSync } from "@/utils/storage";
 
 export default defineBackground(() => {
   console.log("Hello background!", { id: browser.runtime.id });
 
+  // 初始化同步监听器（sync → local 实时同步）
+  // (Initialize sync listener for real-time sync → local)
+  initSyncListener();
+
   // 初始化右键菜单 (Initialize context menus)
   browser.runtime.onInstalled.addListener(async () => {
     await initLanguage();
+
+    // 执行数据迁移（将旧的 local 数据同步到 sync）
+    // (Migrate existing local data to sync storage)
+    await migrateLocalToSync();
 
     browser.contextMenus.create({
       id: "snaplab_add_whitelist",
@@ -30,23 +39,23 @@ export default defineBackground(() => {
       if (!host) return;
 
       if (info.menuItemId === "snaplab_add_whitelist") {
-        const result = await browser.storage.local.get(["toolbarWhitelist", "toolbarBlacklist"]);
+        const result = await getSyncSettings(["toolbarWhitelist", "toolbarBlacklist"]);
         let wl = (result.toolbarWhitelist as string[]) || [];
         let bl = (result.toolbarBlacklist as string[]) || [];
 
         if (!wl.includes(host)) wl.push(host);
         bl = bl.filter((h) => h !== host); // 移出黑名单
 
-        await browser.storage.local.set({ toolbarWhitelist: wl, toolbarBlacklist: bl });
+        await setSyncSettings({ toolbarWhitelist: wl, toolbarBlacklist: bl });
       } else if (info.menuItemId === "snaplab_add_blacklist") {
-        const result = await browser.storage.local.get(["toolbarWhitelist", "toolbarBlacklist"]);
+        const result = await getSyncSettings(["toolbarWhitelist", "toolbarBlacklist"]);
         let wl = (result.toolbarWhitelist as string[]) || [];
         let bl = (result.toolbarBlacklist as string[]) || [];
 
         if (!bl.includes(host)) bl.push(host);
         wl = wl.filter((h) => h !== host); // 移出白名单
 
-        await browser.storage.local.set({ toolbarWhitelist: wl, toolbarBlacklist: bl });
+        await setSyncSettings({ toolbarWhitelist: wl, toolbarBlacklist: bl });
       }
     } catch (e) {
       console.error("Invalid URL for context menu action:", tab.url);

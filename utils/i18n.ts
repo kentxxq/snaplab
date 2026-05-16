@@ -4,6 +4,8 @@
  * 因此实现自定义方案：内嵌翻译文本 + storage 存储用户偏好。
  */
 
+import { getSyncSettings, setSyncSettings } from "@/utils/storage";
+
 // 支持的语言 (supported languages)
 export type Language = "zh_CN" | "en";
 
@@ -275,7 +277,7 @@ let currentLang: Language = "zh_CN";
  */
 export async function initLanguage(): Promise<Language> {
   try {
-    const result = await browser.storage.local.get("language");
+    const result = await getSyncSettings(["language"]);
     if (result.language && (result.language === "zh_CN" || result.language === "en")) {
       currentLang = result.language as Language;
     }
@@ -304,5 +306,5 @@ export function getLanguage(): Language {
  */
 export async function setLanguage(lang: Language): Promise<void> {
   currentLang = lang;
-  await browser.storage.local.set({ language: lang });
+  await setSyncSettings({ language: lang });
 }

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed, nextTick } from "vue";
 import { initLanguage, t, getLanguage, setLanguage, type Language } from "@/utils/i18n";
+import { getSyncSettings, setSyncSettings } from "@/utils/storage";
 
 // 语言状态 (language state)
 const currentLang = ref<Language>("zh_CN");
@@ -26,7 +27,9 @@ onMounted(async () => {
   ready.value = true;
 
   // 从 storage 读取开关状态 (read toggle state from storage)
-  const result = await browser.storage.local.get([
+  // 从 sync storage 读取设置（自动降级到 local）
+  // (Read settings from sync storage, auto fallback to local)
+  const result = await getSyncSettings([
     "interceptEnabled",
     "beautifyEnabled",
     "toolbarStrategy",
@@ -78,7 +81,7 @@ const isCurrentSiteActive = computed(() => {
 });
 
 async function updateStrategy() {
-  await browser.storage.local.set({ toolbarStrategy: toolbarStrategy.value });
+  await setSyncSettings({ toolbarStrategy: toolbarStrategy.value });
 }
 
 // 手动添加域名到名单 (add domain to list manually)
@@ -100,7 +103,7 @@ async function addToWhitelist() {
   toolbarWhitelist.value.push(domain);
   // 互斥：从黑名单中移除 (exclusive: remove from blacklist)
   toolbarBlacklist.value = toolbarBlacklist.value.filter((h) => h !== domain);
-  await browser.storage.local.set({
+  await setSyncSettings({
     toolbarWhitelist: [...toolbarWhitelist.value],
     toolbarBlacklist: [...toolbarBlacklist.value],
   });
@@ -117,7 +120,7 @@ async function addToBlacklist() {
   toolbarBlacklist.value.push(domain);
   // 互斥：从白名单中移除 (exclusive: remove from whitelist)
   toolbarWhitelist.value = toolbarWhitelist.value.filter((h) => h !== domain);
-  await browser.storage.local.set({
+  await setSyncSettings({
     toolbarWhitelist: [...toolbarWhitelist.value],
     toolbarBlacklist: [...toolbarBlacklist.value],
   });
@@ -126,14 +129,14 @@ async function addToBlacklist() {
 
 async function removeFromWhitelist(host: string) {
   toolbarWhitelist.value = toolbarWhitelist.value.filter((h) => h !== host);
-  await browser.storage.local.set({
+  await setSyncSettings({
     toolbarWhitelist: [...toolbarWhitelist.value],
   });
 }
 
 async function removeFromBlacklist(host: string) {
   toolbarBlacklist.value = toolbarBlacklist.value.filter((h) => h !== host);
-  await browser.storage.local.set({
+  await setSyncSettings({
     toolbarBlacklist: [...toolbarBlacklist.value],
   });
 }
@@ -142,12 +145,12 @@ async function removeFromBlacklist(host: string) {
 
 async function toggleIntercept() {
   interceptEnabled.value = !interceptEnabled.value;
-  await browser.storage.local.set({ interceptEnabled: interceptEnabled.value });
+  await setSyncSettings({ interceptEnabled: interceptEnabled.value });
 }
 
 async function toggleBeautify() {
   beautifyEnabled.value = !beautifyEnabled.value;
-  await browser.storage.local.set({ beautifyEnabled: beautifyEnabled.value });
+  await setSyncSettings({ beautifyEnabled: beautifyEnabled.value });
 }
 
 // 切换语言 (switch language)
